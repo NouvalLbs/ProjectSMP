@@ -24,3 +24,4 @@ C:\Users\Nouval\Desktop\ProjectSMP\gamemodes\Debug\net6.0\ProjectSMP.deps.json
 C:\Users\Nouval\Desktop\ProjectSMP\gamemodes\Debug\net6.0\ProjectSMP.runtimeconfig.json
 C:\Users\Nouval\Desktop\ProjectSMP\gamemodes\Debug\net6.0\ProjectSMP.dll
 C:\Users\Nouval\Desktop\ProjectSMP\gamemodes\Debug\net6.0\ProjectSMP.pdb
+C:\Users\Nouval\source\repos\ProjectSMP\ProjectSMP\obj\Debug\net6.0\ProjectSMP.sourcelink.json
