@@ -1,0 +1,22 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+    <PropertyGroup>
+        <OutputType>Exe</OutputType>
+        <TargetFramework>net6.0</TargetFramework>
+        <BaseOutputPath>C:\Users\Nouval\Desktop\ProjectSMP\gamemodes</BaseOutputPath>
+    </PropertyGroup>
+
+    <ItemGroup>
+        <PackageReference Include="BCrypt.Net-Next" Version="4.1.0" />
+        <PackageReference Include="Dapper" Version="2.0.151" />
+        <PackageReference Include="Discord.Net" Version="3.15.3" />
+        <PackageReference Include="Discord.Net.Interactions" Version="3.15.3" />
+        <PackageReference Include="Discord.Net.WebSocket" Version="3.15.3" />
+        <PackageReference Include="MaxMind.GeoIP2" Version="5.2.0" />
+        <PackageReference Include="MySqlConnector" Version="2.2.7" />
+        <PackageReference Include="SampSharp.GameMode" Version="0.11.1" />
+        <PackageReference Include="SampSharp.Streamer" Version="0.10.0" />
+        <PackageReference Include="System.Diagnostics.DiagnosticSource" Version="6.0.1" />
+    </ItemGroup>
+
+</Project>

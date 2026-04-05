@@ -1,0 +1,9 @@
+{
+  "profiles": {
+    "ProjectSMP": {
+      "commandName": "Executable",
+      "executablePath": "C:\\Users\\Nouval\\Desktop\\ProjectSMP\\samp-server.exe",
+      "workingDirectory": "C:\\Users\\Nouval\\Desktop\\ProjectSMP"
+    }
+  }
+}

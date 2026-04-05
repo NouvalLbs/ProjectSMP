@@ -1,0 +1,35 @@
+﻿using ProjectSMP.Core;
+using SampSharp.Streamer.World;
+
+namespace ProjectSMP.Features.Bank.DynamicATM
+{
+    public class DynamicATMData
+    {
+        public int Id { get; set; }
+        public int VirtualWorld { get; set; }
+        public int Interior { get; set; }
+        public float PosX { get; set; }
+        public float PosY { get; set; }
+        public float PosZ { get; set; }
+        public float RotX { get; set; }
+        public float RotY { get; set; }
+        public float RotZ { get; set; }
+
+        public DynamicObject Object { get; set; }
+        public DynamicTextLabel Label { get; set; }
+        public Polygon Polygon { get; set; }
+    }
+
+    public class ATMLocationRow
+    {
+        public int ID { get; set; }
+        public int Vw { get; set; }
+        public int Interior { get; set; }
+        public float Posx { get; set; }
+        public float Posy { get; set; }
+        public float Posz { get; set; }
+        public float Rotx { get; set; }
+        public float Roty { get; set; }
+        public float Rotz { get; set; }
+    }
+}
