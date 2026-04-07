@@ -32,8 +32,7 @@ namespace ProjectSMP.Entities.Vehicles.Engine
             bool newState = !vehicle.GetEngineState();
             if (newState)
             {
-                var name = Utilities.ReturnName(player);
-                ChatService.ProcessActionText(player, $"{name} mencoba menghidupkan mesin kendaraan.", ActionType.Me, ChatDistance.Normal);
+                ChatService.ProcessActionText(player, "mencoba menghidupkan mesin kendaraan.", ActionType.Me, ChatDistance.Normal);
 
                 var delay = _rng.Next(2000, 4001);
                 var t = new Timer(delay, false);

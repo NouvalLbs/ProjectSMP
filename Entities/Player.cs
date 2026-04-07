@@ -74,6 +74,7 @@ namespace ProjectSMP
             NameTagService.Cleanup(this);
             ChatService.Cleanup(this);
             AskService.ClearPlayerAsks(this);
+            AdminVehicleService.Cleanup(this);
             _ = InventoryService.SaveAsync(this);
             ProgressBarService.OnPlayerDisconnect(this);
             SpeedometerService.OnPlayerDisconnect(this);
