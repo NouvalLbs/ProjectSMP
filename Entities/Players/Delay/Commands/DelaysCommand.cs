@@ -37,9 +37,9 @@ namespace ProjectSMP.Entities.Players.Delay.Commands
             AddDelayRow(rows, "Bus", "Sidejob", player.Delays.Bus);
             AddDelayRow(rows, "Trashmaster", "Sidejob", player.Delays.Trashmaster);
             AddDelayRow(rows, "Mower", "Sidejob", player.Delays.Mower);
-            AddDelayRow(rows, "Fisherman", "Sidejob", player.Delays.Fisherman);
-            AddDelayRow(rows, "Honey", "Sidejob", player.Delays.Honey);
             AddDelayRow(rows, "Miner", "Sidejob", player.Delays.Miner);
+            AddDelayRow(rows, "Fisherman", "Activity", player.Delays.Fisherman);
+            AddDelayRow(rows, "Honey", "Activity", player.Delays.Honey);
 
             player.ShowTabList(
                 $"Delays: {player.CharInfo.Username}",
