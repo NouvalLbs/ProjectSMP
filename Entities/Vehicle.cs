@@ -45,6 +45,16 @@ namespace ProjectSMP.Entities
         public string ImpoundReason { get; set; } = "";
 
         public bool IsLockTire { get; set; } = false;
+        public bool IsABike => EVFVehicleType.IsABike((int)Model);
+        public bool IsABicycle => EVFVehicleType.IsABicycle((int)Model);
+        public bool IsABoat => EVFVehicleType.IsABoat((int)Model);
+        public bool IsAPlane => EVFVehicleType.IsAPlane((int)Model);
+        public bool IsAHeli => EVFVehicleType.IsAHeli((int)Model);
+        public bool IsATrain => EVFVehicleType.IsATrain((int)Model);
+        public bool IsARCVehicle => EVFVehicleType.IsARCVehicle((int)Model);
+        public bool IsACar => EVFVehicleType.IsACar((int)Model);
+        public bool IsAirborne => EVFVehicleType.IsAirborne((int)Model);
+        public bool IsGroundVehicle => EVFVehicleType.IsGroundVehicle((int)Model);
 
         public float VehicleHealth
         {

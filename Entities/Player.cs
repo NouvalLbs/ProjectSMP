@@ -9,6 +9,7 @@ using ProjectSMP.Entities.Players.Inventory;
 using ProjectSMP.Entities.Players.NameTag;
 using ProjectSMP.Entities.Players.Needs;
 using ProjectSMP.Entities.Vehicles.Engine;
+using ProjectSMP.Entities.Vehicles.Seatbelt;
 using ProjectSMP.Entities.Vehicles.Speedo;
 using ProjectSMP.Extensions;
 using ProjectSMP.Features.Bank;
@@ -76,6 +77,7 @@ namespace ProjectSMP
             _ = InventoryService.SaveAsync(this);
             ProgressBarService.OnPlayerDisconnect(this);
             SpeedometerService.OnPlayerDisconnect(this);
+            SeatbeltService.OnPlayerDisconnect(this);
             ForklifterService.OnPlayerDisconnect(this);
             SweeperService.OnPlayerDisconnect(this);
             BusService.OnPlayerDisconnect(this);
@@ -226,6 +228,7 @@ namespace ProjectSMP
         public override void OnExitVehicle(PlayerVehicleEventArgs e)
         {
             base.OnExitVehicle(e);
+            SeatbeltService.OnPlayerExitVehicle(this);
             ForklifterService.OnPlayerExitVehicle(this, e.Vehicle as Vehicle);
             SweeperService.OnPlayerExitVehicle(this, e.Vehicle as Vehicle);
             BusService.OnPlayerExitVehicle(this, e.Vehicle as Vehicle);
@@ -277,6 +280,7 @@ namespace ProjectSMP
             EVFService.OnPlayerStateChange(Id, e.NewState, e.OldState);
             EngineService.OnPlayerStateChanged(this, e.NewState);
             SpeedometerService.OnPlayerStateChanged(this, e.NewState, e.OldState);
+            SeatbeltService.OnPlayerStateChanged(this, e.NewState);
             ForklifterService.OnPlayerStateChanged(this, e.NewState, e.OldState);
             SweeperService.OnPlayerStateChanged(this, e.NewState, e.OldState);
             BusService.OnPlayerStateChanged(this, e.NewState, e.OldState);
