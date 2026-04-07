@@ -1,10 +1,11 @@
 ﻿#nullable enable
-using System.Collections.Generic;
 using ProjectSMP.Entities;
+using ProjectSMP.Entities.Vehicles.Handbrake;
 using SampSharp.GameMode;
 using SampSharp.GameMode.Definitions;
 using SampSharp.GameMode.SAMP;
 using SampSharp.GameMode.World;
+using System.Collections.Generic;
 
 namespace ProjectSMP.Features.Jobs.Core
 {
@@ -98,6 +99,7 @@ namespace ProjectSMP.Features.Jobs.Core
 
             var newVehicle = Vehicle.CreateVehicle(data.Model, data.Position, data.Rotation, data.Color1, data.Color2, 60);
             newVehicle.VehicleType = VehicleType.Job;
+            HandbrakeService.EngageSilent(newVehicle);
 
             _spawnData[newVehicle.Id] = data;
         }

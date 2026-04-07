@@ -12,6 +12,20 @@ namespace ProjectSMP.Features.Bank.Paycheck
         private const int ClaimInterval = 3600;
         private static Timer _timer;
         private static readonly HashSet<int> _players = new();
+        private const double IncomeTaxRate = 0.05;
+        private const int RoadTax = 300;
+
+        private static int CalculateInterest(int balance)
+        {
+            double rate = balance switch
+            {
+                <= 2_500_000 => 0.004,
+                <= 10_000_000 => 0.0025,
+                <= 25_000_000 => 0.0015,
+                _ => 0.0005
+            };
+            return (int)Math.Round(balance * rate);
+        }
 
         public static void Initialize()
         {
@@ -58,15 +72,32 @@ namespace ProjectSMP.Features.Bank.Paycheck
         public static bool ClaimPaycheck(Player player)
         {
             if (!CanClaim(player)) return false;
-            var total = GetTotal(player);
-            if (total <= 0) return false;
+            var gross = GetTotal(player);
+            if (gross <= 0) return false;
 
             var account = player.BankAccounts.FirstOrDefault(a => a.IsActive);
             if (account == null) return false;
 
-            account.Balance += total;
+            var prevBalance = account.Balance;
+            var interest = CalculateInterest(prevBalance);
+            var incomeTax = (int)Math.Round(gross * IncomeTaxRate);
+            var net = gross - incomeTax - RoadTax + interest;
+
+            account.Balance += net;
             BankService.UpdateTransactionDate(account);
             _ = BankService.SaveAccountAsync(account);
+
+            player.PaycheckData.PaycheckNumber++;
+            var num = player.PaycheckData.PaycheckNumber;
+
+            var sep = "_________________";
+            player.SendClientMessage(Color.White, $"{sep} {{FFFF00}}San Andreas Bank Paycheck #{num} {{FFFFFF}}{sep}");
+            player.SendClientMessage(Color.White, $"{{FFFFFF}}Previous Balance: {{00FF00}}{Utilities.GroupDigits(prevBalance)}");
+            player.SendClientMessage(Color.White, $"{{FFFFFF}}Bank Interest: {{00FF00}}{Utilities.GroupDigits(interest)}");
+            player.SendClientMessage(Color.White, $"{{FFFFFF}}Income Balance: {{00FF00}}{Utilities.GroupDigits(gross)}");
+            player.SendClientMessage(Color.White, $"{{FFFFFF}}Income Tax: {{FF0000}}-{Utilities.GroupDigits(incomeTax)}");
+            player.SendClientMessage(Color.White, $"{{FFFFFF}}Road Tax: {{FF0000}}-{Utilities.GroupDigits(RoadTax)}");
+            player.SendClientMessage(Color.White, $"{{FFFFFF}}New Balance: {{00FF00}}{Utilities.GroupDigits(account.Balance)}");
 
             player.PaycheckData.PaycheckList.Clear();
             player.PaycheckData.PaycheckTime = 0;

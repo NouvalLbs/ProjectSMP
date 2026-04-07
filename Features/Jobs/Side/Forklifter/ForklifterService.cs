@@ -2,6 +2,7 @@
 using ProjectSMP.Core;
 using ProjectSMP.Entities;
 using ProjectSMP.Entities.Players.Delay;
+using ProjectSMP.Entities.Vehicles.Handbrake;
 using ProjectSMP.Extensions;
 using ProjectSMP.Features.Bank.Paycheck;
 using ProjectSMP.Features.Jobs.Core;
@@ -72,6 +73,7 @@ namespace ProjectSMP.Features.Jobs.Side.Forklifter
             {
                 var v = Vehicle.CreateVehicle((VehicleModelType)530, new Vector3(x, y, z), a, -1, -1, 60);
                 v.VehicleType = VehicleType.Job;
+                HandbrakeService.EngageSilent(v);
                 _vehicleIds.Add(v.Id);
                 SideJobVehicleManager.RegisterVehicle(v.Id, (VehicleModelType)530, new Vector3(x, y, z), a, -1, -1);
             }

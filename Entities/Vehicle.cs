@@ -1,4 +1,5 @@
 ﻿#nullable enable
+using ProjectSMP.Entities.Vehicles.Handbrake;
 using ProjectSMP.Extensions;
 using ProjectSMP.Plugins.EVF2;
 using ProjectSMP.Plugins.WeaponConfig;
@@ -187,8 +188,15 @@ namespace ProjectSMP.Entities
         }
 
         protected virtual void OnPlayerEnterVehicle(Player? player, bool isPassenger) { }
-        protected virtual void OnPlayerExitVehicle(Player? player) { }
-        protected virtual void OnVehicleDestroyed(Player? killer) { }
+        protected virtual void OnPlayerExitVehicle(Player? player)
+        {
+            if (player != null)
+                HandbrakeService.OnPlayerExitVehicle(player, this);
+        }
+        protected virtual void OnVehicleDestroyed(Player? killer)
+        {
+            HandbrakeService.OnVehicleRemoved(Id);
+        }
         protected virtual void OnVehicleStreamIn(Player? player) { }
         protected virtual void OnVehicleStreamOut(Player? player) { }
         protected virtual void OnVehicleModified(Player? player, int componentId) { }

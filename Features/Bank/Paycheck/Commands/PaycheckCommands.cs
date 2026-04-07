@@ -40,13 +40,13 @@ namespace ProjectSMP.Features.Bank.Paycheck.Commands
                 rows.Add(new[] { e.Time, e.From, $"{{00FF00}}{Utilities.GroupDigits(e.Amount)}{{ffffff}}" });
             }
 
-            rows.Add(new[] { "Total Salary", ":", $"{{00FF00}}{Utilities.GroupDigits(total)}" });
-
             if (page > 0)
-                rows.Add(new[] { "{FF6347}<< Previous{ffffff}", "\0", "\0" });
+                rows.Add(new[] { "{FF6347}<< Previous{ffffff}", "", "" });
 
             if (page < totalPages - 1)
-                rows.Add(new[] { "{ADFF2F}>> Next{ffffff}", "\0", "\0" });
+                rows.Add(new[] { "{ADFF2F}>> Next{ffffff}", "", "" });
+
+            rows.Add(new[] { "Total Salary", ":", $"{{00FF00}}{Utilities.GroupDigits(total)}" });
 
             player.ShowTabList(
                 $"Pending Salary (Page {page + 1}/{totalPages})",

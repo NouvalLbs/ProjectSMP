@@ -76,28 +76,28 @@ namespace ProjectSMP.Features.Bank
                         case 4: ShowWithdrawDialog(player, accountIndex); break;
                         case 5: ShowTransferAccountDialog(player, accountIndex); break;
                         case 6:
-                            if (!PaycheckService.CanClaim(player)) {
+                            if (!PaycheckService.CanClaim(player))
+                            {
                                 player.SendClientMessage(Color.White,
                                     $"{Msg.Bank} Gaji belum bisa diambil! Tunggu {{FF6347}}{PaycheckService.GetTimeLeft(player)}{{FFFFFF}} lagi.");
                                 return;
                             }
 
                             var claimTotal = PaycheckService.GetTotal(player);
-                            if (claimTotal <= 0) {
+                            if (claimTotal <= 0)
+                            {
                                 player.SendClientMessage(Color.White, $"{Msg.Bank} Tidak ada gaji yang bisa diambil saat ini.");
                                 return;
                             }
 
                             var claimAccount = player.BankAccounts.FirstOrDefault(a => a.IsActive);
-                            if (claimAccount == null) {
+                            if (claimAccount == null)
+                            {
                                 player.SendClientMessage(Color.White, $"{Msg.Bank} Kamu tidak memiliki rekening bank aktif!");
                                 return;
                             }
 
-                            if (PaycheckService.ClaimPaycheck(player)) {
-                                player.SendClientMessage(Color.White,
-                                    $"{Msg.Bank} Berhasil mengambil gaji {{00FF00}}{Utilities.GroupDigits(claimTotal)}{{FFFFFF}} ke rekening {{FFFF00}}{claimAccount.AccountName}{{FFFFFF}}!");
-                            }
+                            PaycheckService.ClaimPaycheck(player);
                             break;
                         default:
                             ShowBankMenu(player, 0);

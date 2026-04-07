@@ -4,6 +4,7 @@ using ProjectSMP.Entities.Players.Administrator;
 using ProjectSMP.Entities.Players.Condition;
 using ProjectSMP.Entities.Players.Delay;
 using ProjectSMP.Entities.Players.Needs;
+using ProjectSMP.Entities.Vehicles.Handbrake;
 using ProjectSMP.Entities.Vehicles.Speedo;
 using ProjectSMP.Extensions;
 using ProjectSMP.Features.Bank.DynamicATM;
@@ -130,6 +131,9 @@ namespace ProjectSMP
 
             // Initialize Speedometer Service
             SpeedometerService.Initialize();
+
+            // Initialize Handbrake Service
+            HandbrakeService.Initialize();
 
             // Initialize Condition Service
             ConditionService.Initialize();
@@ -270,6 +274,7 @@ namespace ProjectSMP
             RealtimeClockService.Dispose();
             NeedsService.Dispose();
             SpeedometerService.Dispose();
+            HandbrakeService.Dispose();
             ConditionService.Dispose();
             JailService.Dispose();
             PlaytimeService.Dispose();

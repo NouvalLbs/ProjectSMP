@@ -1,5 +1,6 @@
 ﻿#nullable enable
 using ProjectSMP.Core;
+using ProjectSMP.Entities.Vehicles.Handbrake;
 using ProjectSMP.Features.Chat;
 using SampSharp.GameMode.Definitions;
 using SampSharp.GameMode.SAMP;
@@ -41,11 +42,13 @@ namespace ProjectSMP.Entities.Vehicles.Engine
                     t.Dispose();
                     if (player.IsDisposed || player.State != PlayerState.Driving) return;
                     vehicle.ToggleEngine(true);
+                    HandbrakeService.SetHandbrake(player, vehicle, false);
                 };
             }
             else
             {
                 vehicle.ToggleEngine(false);
+                HandbrakeService.SetHandbrake(player, vehicle, true);
             }
         }
     }

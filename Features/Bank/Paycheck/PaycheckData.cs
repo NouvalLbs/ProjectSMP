@@ -12,6 +12,7 @@ namespace ProjectSMP.Features.Bank.Paycheck
     public class PaycheckData
     {
         public int PaycheckTime { get; set; }
+        public int PaycheckNumber { get; set; }
         public List<PaycheckEntry> PaycheckList { get; set; } = new();
     }
 }

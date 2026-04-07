@@ -322,7 +322,7 @@ namespace ProjectSMP.Entities.Players.Character
             foreach (var c in list)
                 rows.Add(new[] { $"{{ffffff}}{c.Username}", c.Level.ToString(), c.Last_login });
             if (list.Count < MaxChars)
-                rows.Add(new[] { L(player, "CHAR", "LIST_CREATE_BTN"), "\0", "\0" });
+                rows.Add(new[] { L(player, "CHAR", "LIST_CREATE_BTN"), "", "" });
 
             player.ShowTabList(
                 L(player, "CHAR", "LIST_TITLE"),
@@ -616,7 +616,8 @@ namespace ProjectSMP.Entities.Players.Character
                         Settings = Ser(new CharSettings()),
                         Jobs = Ser(new List<CharJob>()),
                         PaycheckData = Ser(new PaycheckData()),
-                        CharInfo = Ser(new CharInfo {
+                        CharInfo = Ser(new CharInfo
+                        {
                             Username = c.Name,
                             Skin = c.Skin,
                             Gender = c.Gender,

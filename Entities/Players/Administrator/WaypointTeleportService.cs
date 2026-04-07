@@ -8,8 +8,6 @@ namespace ProjectSMP.Entities.Players.Administrator
 {
     public static class WaypointTeleportService
     {
-        private const float RaycastStartZ = 700f;
-        private const float RaycastEndZ = -1000f;
         private const float FallbackOffsetZ = 3f;
         private const float GroundOffsetZ = 0.5f;
 
@@ -21,12 +19,9 @@ namespace ProjectSMP.Entities.Players.Administrator
             var y = clickedPos.Y;
             float z;
 
-            var hit = ColAndreasService.RayCastLine(
-                x, y, RaycastStartZ,
-                x, y, RaycastEndZ,
-                out _, out _, out var groundZ);
-
-            z = hit != 0 ? groundZ + GroundOffsetZ : clickedPos.Z + FallbackOffsetZ;
+            z = ColAndreasService.FindZFor2DCoord(x, y, out var groundZ)
+                ? groundZ + GroundOffsetZ
+                : clickedPos.Z + FallbackOffsetZ;
 
             TeleportHelper.TeleportToLocation(player, x, y, z, 0, player.GetVirtualWorldSafe());
             player.PutCameraBehindPlayer();
