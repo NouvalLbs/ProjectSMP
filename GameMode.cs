@@ -20,6 +20,7 @@ using ProjectSMP.Features.Jobs.Core.DynamicJob;
 using ProjectSMP.Features.Jobs.Side.Bus;
 using ProjectSMP.Features.Jobs.Side.Forklifter;
 using ProjectSMP.Features.Jobs.Side.Sweeper;
+using ProjectSMP.Features.Jobs.Side.Trashmaster;
 using ProjectSMP.Features.Jobs.Side.Trashmaster.DynamicTrash;
 using ProjectSMP.Features.LevelSystem;
 using ProjectSMP.Features.PreviewModelDialog;
@@ -172,6 +173,7 @@ namespace ProjectSMP
             ForklifterService.Initialize();
             SweeperService.Initialize();
             BusService.Initialize();
+            TrashmasterService.Initialize();
 
             // Initialize Dynamic Pickups
             PickupService.Initialize();
@@ -304,6 +306,7 @@ namespace ProjectSMP
             SweeperService.Dispose();
             SideJobVehicleManager.Dispose();
             BusService.Dispose();
+            TrashmasterService.Dispose();
             GeoLocationService.Dispose();
             TrashService.Dispose();
 

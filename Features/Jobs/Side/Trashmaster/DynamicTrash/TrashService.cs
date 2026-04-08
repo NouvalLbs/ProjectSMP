@@ -2,11 +2,11 @@ using ProjectSMP.Core;
 using ProjectSMP.Plugins.ColAndreas;
 using SampSharp.GameMode;
 using SampSharp.GameMode.SAMP;
-using SampSharp.GameMode.World;
 using SampSharp.Streamer.Events;
 using SampSharp.Streamer.World;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 
 namespace ProjectSMP.Features.Jobs.Side.Trashmaster.DynamicTrash
@@ -272,6 +272,10 @@ namespace ProjectSMP.Features.Jobs.Side.Trashmaster.DynamicTrash
 
         public static DynamicTrashData GetTrash(int id) =>
             Trashes.TryGetValue(id, out var data) ? data : null;
+
+        public static List<int> GetAvailableTrashIds() {
+            return new List<int>(Trashes.Where(kvp => kvp.Value.Amount > 0).Select(kvp => kvp.Key));
+        }
 
         public static bool Exists(int id) => Trashes.ContainsKey(id);
 

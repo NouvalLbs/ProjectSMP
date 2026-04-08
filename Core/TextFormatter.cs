@@ -43,6 +43,7 @@
         public const string Forklifter = "{C6E2FF}[FORKLIFTER]:{FFFFFF}";
         public const string Sweeper = "{C6E2FF}[SWEEPER]:{FFFFFF}";
         public const string Bus = "{C6E2FF}[BUS]:{FFFFFF}";
+        public const string Trashmaster = "{C6E2FF}[TRASHMASTER]{FFFFFF}";
         public const string Vehicles = "{C6E2FF}VEHICLE:{FFFFFF}";
     }
 }

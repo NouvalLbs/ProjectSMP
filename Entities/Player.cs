@@ -23,6 +23,7 @@ using ProjectSMP.Features.Jobs.Core.DynamicJob;
 using ProjectSMP.Features.Jobs.Side.Bus;
 using ProjectSMP.Features.Jobs.Side.Forklifter;
 using ProjectSMP.Features.Jobs.Side.Sweeper;
+using ProjectSMP.Features.Jobs.Side.Trashmaster;
 using ProjectSMP.Features.PreviewModelDialog;
 using ProjectSMP.Features.ProgressBar;
 using ProjectSMP.Features.ProgressBar.Data;
@@ -82,6 +83,7 @@ namespace ProjectSMP
             ForklifterService.OnPlayerDisconnect(this);
             SweeperService.OnPlayerDisconnect(this);
             BusService.OnPlayerDisconnect(this);
+            TrashmasterService.OnPlayerDisconnect(this);
             this.ClearPlayerData();
             base.OnDisconnected(e);
         }
@@ -224,6 +226,7 @@ namespace ProjectSMP
             ForklifterService.OnPlayerEnterVehicle(this, e.Vehicle as Vehicle, e.IsPassenger);
             SweeperService.OnPlayerEnterVehicle(this, e.Vehicle as Vehicle, e.IsPassenger);
             BusService.OnPlayerEnterVehicle(this, e.Vehicle as Vehicle, e.IsPassenger);
+            TrashmasterService.OnPlayerEnterVehicle(this, e.Vehicle as Vehicle, e.IsPassenger);
         }
 
         public override void OnExitVehicle(PlayerVehicleEventArgs e)
@@ -233,13 +236,16 @@ namespace ProjectSMP
             ForklifterService.OnPlayerExitVehicle(this, e.Vehicle as Vehicle);
             SweeperService.OnPlayerExitVehicle(this, e.Vehicle as Vehicle);
             BusService.OnPlayerExitVehicle(this, e.Vehicle as Vehicle);
+            TrashmasterService.OnPlayerExitVehicle(this, e.Vehicle as Vehicle);
         }
 
         public override void OnKeyStateChanged(KeyStateChangedEventArgs e)
         {
             base.OnKeyStateChanged(e);
-            if (e.NewKeys.HasFlag(Keys.Yes) && !e.OldKeys.HasFlag(Keys.Yes))
-                EngineService.ToggleEngine(this);
+            if (e.NewKeys.HasFlag(Keys.Yes) && !e.OldKeys.HasFlag(Keys.Yes)) {
+                if (!TrashmasterService.HandleYKey(this))
+                    EngineService.ToggleEngine(this);
+            }
 
             if (e.NewKeys.HasFlag(Keys.Crouch) && !e.OldKeys.HasFlag(Keys.Crouch))
                 EVFExtensions.HandleHorn(this);
@@ -259,6 +265,7 @@ namespace ProjectSMP
                 BankPickupService.HandleInteract(this);
                 ATMService.HandleInteract(this);
                 JobPickupService.HandleInteract(this);
+                TrashmasterService.HandleDropoutInteract(this);
             }
 
             if (e.NewKeys.HasFlag(Keys.Walk))
@@ -285,6 +292,7 @@ namespace ProjectSMP
             ForklifterService.OnPlayerStateChanged(this, e.NewState, e.OldState);
             SweeperService.OnPlayerStateChanged(this, e.NewState, e.OldState);
             BusService.OnPlayerStateChanged(this, e.NewState, e.OldState);
+            TrashmasterService.OnPlayerStateChanged(this, e.NewState, e.OldState);
         }
 
         public override void OnClickMap(PositionEventArgs e)
