@@ -20,6 +20,7 @@ using ProjectSMP.Features.Jobs.Core.DynamicJob;
 using ProjectSMP.Features.Jobs.Side.Bus;
 using ProjectSMP.Features.Jobs.Side.Forklifter;
 using ProjectSMP.Features.Jobs.Side.Sweeper;
+using ProjectSMP.Features.Jobs.Side.Trashmaster.DynamicTrash;
 using ProjectSMP.Features.LevelSystem;
 using ProjectSMP.Features.PreviewModelDialog;
 using ProjectSMP.Features.ProgressBar;
@@ -196,6 +197,11 @@ namespace ProjectSMP
             JobPickupService.Initialize();
             var jobDataList = Task.Run(JobPickupService.LoadDataAsync).GetAwaiter().GetResult();
             JobPickupService.CreateObjects(jobDataList);
+
+            // Initialize Dynamic Trashes
+            TrashService.Initialize();
+            var trashDataList = Task.Run(TrashService.LoadDataAsync).GetAwaiter().GetResult();
+            TrashService.CreateObjects(trashDataList);
         }
 
         private void OnAnticheatPunishment(int playerId, string checkName, PunishAction action)
@@ -299,6 +305,7 @@ namespace ProjectSMP
             SideJobVehicleManager.Dispose();
             BusService.Dispose();
             GeoLocationService.Dispose();
+            TrashService.Dispose();
 
             try
             {
