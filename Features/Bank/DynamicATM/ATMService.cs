@@ -1,7 +1,9 @@
 ﻿using ProjectSMP.Core;
+using ProjectSMP.Plugins.ColAndreas;
 using SampSharp.GameMode;
 using SampSharp.GameMode.Definitions;
 using SampSharp.GameMode.SAMP;
+using SampSharp.GameMode.World;
 using SampSharp.Streamer.Events;
 using SampSharp.Streamer.World;
 using System;
@@ -118,7 +120,7 @@ namespace ProjectSMP.Features.Bank.DynamicATM
             var pos = new Vector3(data.PosX, data.PosY, data.PosZ);
             var rot = new Vector3(data.RotX, data.RotY, data.RotZ);
 
-            data.Object = new DynamicObject(ATMModel, pos, rot, data.VirtualWorld, data.Interior);
+            data.ColDCIndex = ColAndreasDynamicObjectManager.CreateObject_DC(ATMModel, pos, rot, worldid: data.VirtualWorld, interiorid: data.Interior);
 
             var labelText = $"{{C6E2FF}}[ID: {data.Id}]\n{{FFFFFF}}Status: {{73d222}}Beroperasi\n{{FFFFFF}}Tekan '{{FF0000}}F{{FFFFFF}}' untuk berinteraksi";
             data.Label = new DynamicTextLabel(labelText, Color.White, pos + new Vector3(0, 0, 1.0f), 3.0f);
@@ -159,6 +161,9 @@ namespace ProjectSMP.Features.Bank.DynamicATM
         {
             if (!ATMs.TryGetValue(id, out var data)) return;
 
+            var obj = ColAndreasDynamicObjectManager.GetDynamicObject(data.ColDCIndex);
+            if (obj == null) return;
+
             _editingATM[player.Id] = id;
 
             EventHandler<PlayerEditEventArgs> handler = null;
@@ -167,7 +172,7 @@ namespace ProjectSMP.Features.Bank.DynamicATM
                 if (e.Player?.Id != player.Id) return;
                 if (e.Response == EditObjectResponse.Final)
                 {
-                    data.Object.Edited -= handler;
+                    obj.Edited -= handler;
                     data.PosX = e.Position.X;
                     data.PosY = e.Position.Y;
                     data.PosZ = e.Position.Z;
@@ -184,9 +189,9 @@ namespace ProjectSMP.Features.Bank.DynamicATM
                 }
                 else if (e.Response == EditObjectResponse.Cancel)
                 {
-                    data.Object.Edited -= handler;
-                    data.Object.Position = new Vector3(data.PosX, data.PosY, data.PosZ);
-                    data.Object.Rotation = new Vector3(data.RotX, data.RotY, data.RotZ);
+                    obj.Edited -= handler;
+                    obj.Position = new Vector3(data.PosX, data.PosY, data.PosZ);
+                    obj.Rotation = new Vector3(data.RotX, data.RotY, data.RotZ);
                     _editingATM.Remove(player.Id);
 
                     player.SendClientMessage(Color.White,
@@ -194,38 +199,8 @@ namespace ProjectSMP.Features.Bank.DynamicATM
                 }
             };
 
-            data.Object.Edited += handler;
-            data.Object.Edit(player);
-        }
-
-        public static void HandleEditResponse(int playerId, int objectId, int response, float x, float y, float z, float rx, float ry, float rz)
-        {
-            if (!_editingATM.TryGetValue(playerId, out var atmId)) return;
-            if (!ATMs.TryGetValue(atmId, out var data)) return;
-
-            var player = SampSharp.GameMode.World.BasePlayer.Find(playerId) as Player;
-
-            if (response == 2)
-            {
-                data.PosX = x; data.PosY = y; data.PosZ = z;
-                data.RotX = rx; data.RotY = ry; data.RotZ = rz;
-                _editingATM.Remove(playerId);
-
-                _ = SaveAsync(atmId);
-                Rebuild(atmId);
-
-                player?.SendClientMessage(Color.White,
-                    $"{Msg.AdmCmd} Posisi ATM ID {atmId} berhasil diperbarui.");
-            }
-            else if (response == 0) // EDIT_RESPONSE_CANCEL
-            {
-                data.Object.Position = new Vector3(data.PosX, data.PosY, data.PosZ);
-                data.Object.Rotation = new Vector3(data.RotX, data.RotY, data.RotZ);
-                _editingATM.Remove(playerId);
-
-                player?.SendClientMessage(Color.White,
-                    $"{Msg.AdmCmd} Edit ATM dibatalkan.");
-            }
+            obj.Edited += handler;
+            obj.Edit(player);
         }
 
         public static DynamicATMData GetATM(int id) =>
@@ -235,7 +210,7 @@ namespace ProjectSMP.Features.Bank.DynamicATM
 
         private static void DestroyObjects(DynamicATMData data)
         {
-            data.Object?.Dispose();
+            if (data.ColDCIndex >= 0) { ColAndreasDynamicObjectManager.DestroyObject(data.ColDCIndex); data.ColDCIndex = -1; }
             data.Label?.Dispose();
             data.Polygon?.Clear();
             ATMGridManager.Remove(data.Id, data.PosX, data.PosY);

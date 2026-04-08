@@ -15,7 +15,7 @@ namespace ProjectSMP.Features.Bank.DynamicATM
         public float RotY { get; set; }
         public float RotZ { get; set; }
 
-        public DynamicObject Object { get; set; }
+        public int ColDCIndex { get; set; } = -1;
         public DynamicTextLabel Label { get; set; }
         public Polygon Polygon { get; set; }
     }
