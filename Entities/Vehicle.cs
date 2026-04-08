@@ -345,6 +345,7 @@ namespace ProjectSMP.Entities
             WeaponConfigService.OnVehicleSpawn(vehicle.Id);
             EVFService.RegisterVehicle(vehicle.Id, (int)modelid, position, rotation, color1, color2, 0, 0, false);
             EVFService.SetFuelEnabled(vehicle.Id, true);
+            HandbrakeService.EngageSilent(vehicle);
             vehicle.SaveSpawnPoint();
             vehicle.ApplySpawnSettings();
             vehicle.CreateVehicleLabel();
@@ -363,6 +364,7 @@ namespace ProjectSMP.Entities
             WeaponConfigService.OnVehicleSpawn(vehicle.Id);
             EVFService.RegisterVehicle(vehicle.Id, (int)modelid, position, rotation, color1, color2, 0, 0, false);
             EVFService.SetFuelEnabled(vehicle.Id, true);
+            HandbrakeService.EngageSilent(vehicle);
             vehicle.SaveSpawnPoint();
             vehicle.ApplySpawnSettings();
             vehicle.CreateVehicleLabel();

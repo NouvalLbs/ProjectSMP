@@ -28,6 +28,7 @@ namespace ProjectSMP.Entities.Vehicles.Seatbelt
         {
             if (newState != PlayerState.Driving) return;
 
+            if (!IsInCar(player)) return;
             var auto = player.Settings.ToggleSeatbeltHelmet;
             _seatbelts[player.Id] = auto;
 
@@ -50,9 +51,9 @@ namespace ProjectSMP.Entities.Vehicles.Seatbelt
 
         public static void ToggleSeatbelt(Player player)
         {
-            if (player.State != PlayerState.Driving)
+            if (player.State != PlayerState.Driving || !IsInCar(player))
             {
-                player.SendClientMessage(-1, $"{Msg.Error} Kamu harus berada di dalam kendaraan.");
+                player.SendClientMessage(-1, $"{Msg.Error} Seatbelt hanya bisa digunakan di dalam mobil.");
                 return;
             }
 
@@ -66,9 +67,13 @@ namespace ProjectSMP.Entities.Vehicles.Seatbelt
         public static bool IsWearing(Player player) =>
             _seatbelts.TryGetValue(player.Id, out var v) && v;
 
+        private static bool IsInCar(Player player) =>
+            player.Vehicle is Vehicle v && v.IsACar;
+
         private static void OnVehicleImpacted(object? sender, VehicleImpactArgs e)
         {
             if (BasePlayer.Find(e.DriverId) is not Player player || player.IsDisposed) return;
+            if (!IsInCar(player)) return;
             if (IsWearing(player)) return;
 
             var level = Math.Clamp((int)(e.Force * 400), 30, 150) * 100;

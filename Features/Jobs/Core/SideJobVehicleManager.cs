@@ -99,7 +99,6 @@ namespace ProjectSMP.Features.Jobs.Core
 
             var newVehicle = Vehicle.CreateVehicle(data.Model, data.Position, data.Rotation, data.Color1, data.Color2, 60);
             newVehicle.VehicleType = VehicleType.Job;
-            HandbrakeService.EngageSilent(newVehicle);
 
             _spawnData[newVehicle.Id] = data;
         }

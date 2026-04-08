@@ -116,7 +116,6 @@ namespace ProjectSMP.Features.Jobs.Side.Sweeper
             {
                 var v = Vehicle.CreateVehicle((VehicleModelType)574, new Vector3(x, y, z), a, -1, -1, 60);
                 v.VehicleType = VehicleType.Job;
-                HandbrakeService.EngageSilent(v);
                 _vehicleIds.Add(v.Id);
                 SideJobVehicleManager.RegisterVehicle(v.Id, (VehicleModelType)574, new Vector3(x, y, z), a, -1, -1);
             }

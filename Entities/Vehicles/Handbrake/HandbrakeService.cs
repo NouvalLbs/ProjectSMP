@@ -39,6 +39,7 @@ namespace ProjectSMP.Entities.Vehicles.Handbrake
         public static void SetHandbrake(Player player, Vehicle vehicle, bool engage)
         {
             if (!player.Settings.ToggleAutoHandbrake) return;
+            if (!vehicle.IsACar) return;
 
             if (!_states.TryGetValue(vehicle.Id, out var state))
             {
@@ -63,8 +64,8 @@ namespace ProjectSMP.Entities.Vehicles.Handbrake
 
         public static void EngageSilent(Vehicle vehicle)
         {
-            var state = new HandbrakeState
-            {
+            if (!vehicle.IsACar) return;
+            var state = new HandbrakeState {
                 Engaged = true,
                 Position = vehicle.Position,
                 Angle = vehicle.Angle
@@ -82,7 +83,7 @@ namespace ProjectSMP.Entities.Vehicles.Handbrake
                 if (!state.Engaged) continue;
 
                 var vehicle = BaseVehicle.Find(vehicleId) as Vehicle;
-                if (vehicle == null) continue;
+                if (vehicle == null || !vehicle.IsACar) continue;
 
                 if (vehicle.Position.DistanceTo(state.Position) >= 2.0f)
                 {
