@@ -78,6 +78,7 @@ namespace ProjectSMP.Entities.Vehicles.Seatbelt
 
             var durationTicks = Math.Clamp((int)(e.Force * 400), 30, 150);
             _drunkTicks[player.Id] = durationTicks;
+            player.DrunkLevel = durationTicks * 100;
         }
 
         private static void OnTick(object? sender, EventArgs e)
@@ -91,8 +92,6 @@ namespace ProjectSMP.Entities.Vehicles.Seatbelt
                 }
 
                 _drunkTicks[id]--;
-                p.DrunkLevel = 2000;
-
                 if (_drunkTicks[id] <= 0)
                 {
                     _drunkTicks.Remove(id);
