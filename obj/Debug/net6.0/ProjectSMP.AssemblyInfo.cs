@@ -14,7 +14,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("ProjectSMP")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+79a2c2d1b924ece0a7a3f4a396f445e989c20d5b")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+5011b8e563c9d553ccbcfaebac0d49c0b0d30ce3")]
 [assembly: System.Reflection.AssemblyProductAttribute("ProjectSMP")]
 [assembly: System.Reflection.AssemblyTitleAttribute("ProjectSMP")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]

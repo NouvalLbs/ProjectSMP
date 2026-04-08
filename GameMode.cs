@@ -12,6 +12,7 @@ using ProjectSMP.Extensions;
 using ProjectSMP.Features.Bank.DynamicATM;
 using ProjectSMP.Features.Bank.DynamicBank;
 using ProjectSMP.Features.Bank.Paycheck;
+using ProjectSMP.Features.Drunk;
 using ProjectSMP.Features.Dynamic.DynamicDoor;
 using ProjectSMP.Features.Dynamic.DynamicPickups;
 using ProjectSMP.Features.Jobs.Core;
@@ -137,6 +138,7 @@ namespace ProjectSMP
             // Initialize Handbrake Service
             HandbrakeService.Initialize();
             SeatbeltService.Initialize();
+            DrunkManager.Initialize();
 
             // Initialize Vehicle Impact Service
             VehicleImpactService.Initialize();
@@ -282,6 +284,7 @@ namespace ProjectSMP
             SpeedometerService.Dispose();
             HandbrakeService.Dispose();
             SeatbeltService.Dispose();
+            DrunkManager.Dispose();
             VehicleImpactService.Dispose();
             ConditionService.Dispose();
             JailService.Dispose();

@@ -1,4 +1,5 @@
 ﻿using ProjectSMP.Core;
+using ProjectSMP.Features.Drunk;
 using SampSharp.GameMode.SAMP;
 using SampSharp.GameMode.World;
 using System.Collections.Generic;
@@ -26,11 +27,13 @@ namespace ProjectSMP.Entities.Players.Needs
         public static void RegisterPlayer(Player player)
         {
             _lastCheck[player.Id] = 0;
+            DrunkManager.RegisterPlayer(player);
         }
 
         public static void UnregisterPlayer(Player player)
         {
             _lastCheck.Remove(player.Id);
+            DrunkManager.UnregisterPlayer(player);
         }
 
         private static void OnTimerTick(object sender, System.EventArgs e)
@@ -48,23 +51,21 @@ namespace ProjectSMP.Entities.Players.Needs
         {
             if (player.Vitals.Hunger >= 10 || player.Vitals.Energy >= 10)
             {
-                player.DrunkLevel = 0;
+                DrunkManager.ClearDrunk(player, DrunkSource.Needs);
                 return;
             }
 
             if (player.Vitals.Hunger <= 10 || player.Vitals.Energy <= 10)
             {
                 if (player.Condition.Migrain > 1 || player.Condition.Fever > 0)
-                {
-                    player.DrunkLevel = 5000 * (player.Condition.Fever + 1);
-                }
+                    DrunkManager.SetDrunk(player, DrunkSource.Needs, 5000 * (player.Condition.Fever + 1));
 
                 if (player.Condition.Fever > 0)
                 {
                     player.Condition.FeverTime++;
                     if (player.Condition.FeverTime > 10)
                     {
-                        player.DrunkLevel = 5000 * (player.Condition.Fever + 1);
+                        DrunkManager.SetDrunk(player, DrunkSource.Needs, 5000 * (player.Condition.Fever + 1));
                         player.Condition.FeverTime = 0;
                     }
                 }
@@ -81,9 +82,7 @@ namespace ProjectSMP.Entities.Players.Needs
                     {
                         player.Condition.Migrain++;
                         if (player.Condition.Migrain < 3)
-                        {
                             player.SendClientMessage(Color.White, $"{Msg.Sick} Kamu terkena sakit kepala, periksalah ke dokter untuk mengobati penyakitmu!");
-                        }
                         else if (player.Condition.Migrain == 4)
                         {
                             player.SendClientMessage(Color.White, $"{Msg.Sick} Kamu terkena demam tinggi, ini penyakit berbahaya, kamu harus segera pergi ke dokter!");
