@@ -199,7 +199,12 @@ namespace ProjectSMP.Features.Jobs.Side.Trashmaster.DynamicTrash
         private static void UpdateLabel(DynamicTrashData data)
         {
             if (data.Label == null) return;
-            data.Label.Text = BuildLabelText(data.Id, data.Amount);
+            data.Label.Dispose();
+
+            var pos = new Vector3(data.PosX, data.PosY, data.PosZ);
+            data.Label = new DynamicTextLabel(BuildLabelText(data.Id, data.Amount), Color.White, pos + new Vector3(0, 0, 1.2f), 4.0f);
+            data.Label.World = data.VirtualWorld;
+            data.Label.Interior = data.Interior;
         }
 
         private static string BuildLabelText(int id, int amount)

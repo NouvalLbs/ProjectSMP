@@ -115,12 +115,15 @@ namespace ProjectSMP.Features.Jobs.Side.Trashmaster
             if (newState != PlayerState.Driving) return;
             var vehicle = player.Vehicle as Vehicle;
             if (vehicle == null || !_vehicleIds.Contains(vehicle.Id)) return;
-            if (!player.IsCharLoaded || _sessions.ContainsKey(player.Id)) return;
-            if (SideJobVehicleManager.IsPendingRespawn(vehicle.Id)) return;
-            if (_sessions.TryGetValue(player.Id, out var existingSession) && vehicle.Id == existingSession.VehicleId) {
-                CancelExitCountdown(player.Id);
+
+            if (!player.IsCharLoaded) return;
+            if (_sessions.TryGetValue(player.Id, out var existingSession)) {
+                if (vehicle.Id == existingSession.VehicleId)
+                    CancelExitCountdown(player.Id);
                 return;
             }
+
+            if (SideJobVehicleManager.IsPendingRespawn(vehicle.Id)) return;
             ShowStartDialog(player);
         }
 
@@ -130,13 +133,13 @@ namespace ProjectSMP.Features.Jobs.Side.Trashmaster
             if (session.Phase != TrashmasterPhase.GoToTrash) return false;
             if (session.CurrentTrashId == -1) return false;
 
-            var trashId = TrashService.CheckPlayerInTrash(player);
-            if (trashId != session.CurrentTrashId) return false;
-
-            var trash = TrashService.GetTrash(trashId);
+            var trash = TrashService.GetTrash(session.CurrentTrashId);
             if (trash == null || trash.Amount <= 0) return false;
 
-            StartCollecting(player, session, trashId);
+            var trashPos = new Vector3(trash.PosX, trash.PosY, trash.PosZ);
+            if (player.Position.DistanceTo(trashPos) > 3.0f) return false;
+
+            StartCollecting(player, session, session.CurrentTrashId);
             return true;
         }
 
@@ -251,7 +254,6 @@ namespace ProjectSMP.Features.Jobs.Side.Trashmaster
             session.Phase = TrashmasterPhase.Collecting;
             ClearCheckpoint(player.Id);
             player.ToggleControllable(false);
-            player.ApplyAnimation("CARRY", "liftup105", 4.1f, false, false, false, false, 0);
             ProgressBarService.StartProgress(player, CollectDuration, "Collecting_Trash...");
 
             var t = new Timer(CollectDuration * 1000, false);
@@ -261,8 +263,6 @@ namespace ProjectSMP.Features.Jobs.Side.Trashmaster
                 if (!player.IsConnected || !_sessions.TryGetValue(player.Id, out var sess)) return;
 
                 player.ToggleControllable(true);
-                player.ClearAnimations();
-
                 if (player.IsAttachedObjectSlotUsed(AttachmentIndex))
                     player.RemoveAttachedObject(AttachmentIndex);
 
@@ -365,6 +365,7 @@ namespace ProjectSMP.Features.Jobs.Side.Trashmaster
                 switch (session.Phase)
                 {
                     case TrashmasterPhase.GoToTrash:
+                        ClearCheckpoint(player.Id);
                         player.SendClientMessage(Color.White,
                             $"{Msg.Trashmaster} Kamu telah tiba! Turun lalu tekan {{FFFF00}}Y{{FFFFFF}} untuk mengambil sampah.");
                         break;
