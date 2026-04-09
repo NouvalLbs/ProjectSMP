@@ -117,7 +117,8 @@ namespace ProjectSMP.Features.Jobs.Side.Trashmaster
             if (vehicle == null || !_vehicleIds.Contains(vehicle.Id)) return;
 
             if (!player.IsCharLoaded) return;
-            if (_sessions.TryGetValue(player.Id, out var existingSession)) {
+            if (_sessions.TryGetValue(player.Id, out var existingSession))
+            {
                 if (vehicle.Id == existingSession.VehicleId)
                     CancelExitCountdown(player.Id);
                 return;
@@ -254,7 +255,7 @@ namespace ProjectSMP.Features.Jobs.Side.Trashmaster
             session.Phase = TrashmasterPhase.Collecting;
             ClearCheckpoint(player.Id);
             player.ToggleControllable(false);
-            ProgressBarService.StartProgress(player, CollectDuration, "Collecting_Trash...");
+            ProgressBarService.StartProgress(player, CollectDuration, "Collecting_Trash...", animIndex: 294, animLib: "CASINO", animName: "cards_win");
 
             var t = new Timer(CollectDuration * 1000, false);
             t.Tick += (s, e) =>
@@ -266,11 +267,11 @@ namespace ProjectSMP.Features.Jobs.Side.Trashmaster
                 if (player.IsAttachedObjectSlotUsed(AttachmentIndex))
                     player.RemoveAttachedObject(AttachmentIndex);
 
-                player.SetAttachedObject(AttachmentIndex, 1264, (Bone)6,
+                player.SetAttachedObjectSafe(AttachmentIndex, 1264, (Bone)6,
                     new Vector3(0.222f, 0.024f, 0.128f),
                     new Vector3(1.90f, -90.0f, 0.0f),
                     new Vector3(0.5f, 0.5f, 0.5f),
-                    Color.Transparent, Color.Transparent);
+                    0, 0);
 
                 TrashService.CollectAmount(trashId, 10);
 
@@ -288,7 +289,7 @@ namespace ProjectSMP.Features.Jobs.Side.Trashmaster
             session.Phase = TrashmasterPhase.Dumping;
             ClearCheckpoint(player.Id);
             player.ToggleControllable(false);
-            player.ApplyAnimation("CARRY", "putdwn105", 4.1f, false, false, false, false, 0);
+            player.ApplyAnimation("GRENADE", "WEAPON_throw", 4.1f, false, false, false, false, 0);
 
             var t = new Timer(1500, false);
             t.Tick += (s, e) =>

@@ -7,7 +7,9 @@ using SampSharp.Streamer.World;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
+using SampTimer = SampSharp.GameMode.SAMP.Timer;
 
 namespace ProjectSMP.Features.Jobs.Side.Trashmaster.DynamicTrash
 {
@@ -18,24 +20,26 @@ namespace ProjectSMP.Features.Jobs.Side.Trashmaster.DynamicTrash
         private const string Table = "trash_locations";
         private const int FillIntervalMs = 10 * 60 * 1000;
         private const int MaxAmount = 100;
+        private const float LabelStreamDistance = 10.0f;
 
         private static readonly int[] TrashModels = { 1344, 1236 };
         private static readonly Random Rng = new();
         private static readonly Dictionary<int, DynamicTrashData> Trashes = new();
         private static readonly Dictionary<int, int> _editingTrash = new();
-        private static Timer _fillTimer;
+        private static readonly SemaphoreSlim _updateLock = new SemaphoreSlim(1, 1);
+        private static SampTimer _fillTimer;
 
         public static void Initialize()
         {
             TrashGridManager.Initialize();
-
-            _fillTimer = new Timer(FillIntervalMs, true);
+            _fillTimer = new SampTimer(FillIntervalMs, true);
             _fillTimer.Tick += OnFillTick;
         }
 
         public static void Dispose()
         {
             _fillTimer?.Dispose();
+            _updateLock?.Dispose();
         }
 
         private static void OnFillTick(object sender, EventArgs e)
@@ -172,7 +176,7 @@ namespace ProjectSMP.Features.Jobs.Side.Trashmaster.DynamicTrash
             data.ColDCIndex = ColAndreasDynamicObjectManager.CreateObject_DC(data.Model, pos, rot, worldid: data.VirtualWorld, interiorid: data.Interior);
 
             var labelText = BuildLabelText(data.Id, data.Amount);
-            data.Label = new DynamicTextLabel(labelText, Color.White, pos + new Vector3(0, 0, 1.2f), 4.0f);
+            data.Label = new DynamicTextLabel(labelText, Color.White, pos + new Vector3(0, 0, 1.2f), 5.0f, null, streamdistance: LabelStreamDistance);
             data.Label.World = data.VirtualWorld;
             data.Label.Interior = data.Interior;
 
@@ -184,7 +188,7 @@ namespace ProjectSMP.Features.Jobs.Side.Trashmaster.DynamicTrash
         {
             if (!Trashes.TryGetValue(id, out var data)) return;
             data.Amount = Math.Clamp(amount, 0, MaxAmount);
-            UpdateLabel(data);
+            UpdateLabelSafe(data);
             _ = SaveAmountAsync(id, data.Amount);
         }
 
@@ -192,17 +196,42 @@ namespace ProjectSMP.Features.Jobs.Side.Trashmaster.DynamicTrash
         {
             if (!Trashes.TryGetValue(id, out var data)) return;
             data.Amount = Math.Max(0, data.Amount - collected);
-            UpdateLabel(data);
+            UpdateLabelSafe(data);
             _ = SaveAmountAsync(id, data.Amount);
+        }
+
+        private static void UpdateLabelSafe(DynamicTrashData data)
+        {
+            _updateLock.Wait();
+            try
+            {
+                UpdateLabel(data);
+            }
+            finally
+            {
+                _updateLock.Release();
+            }
         }
 
         private static void UpdateLabel(DynamicTrashData data)
         {
             if (data.Label == null) return;
-            data.Label.Dispose();
 
             var pos = new Vector3(data.PosX, data.PosY, data.PosZ);
-            data.Label = new DynamicTextLabel(BuildLabelText(data.Id, data.Amount), Color.White, pos + new Vector3(0, 0, 1.2f), 4.0f);
+            var newLabelText = BuildLabelText(data.Id, data.Amount);
+
+            try
+            {
+                data.Label.Dispose();
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"[TrashService] Error disposing label for trash {data.Id}: {ex.Message}");
+            }
+
+            data.Label = null;
+
+            data.Label = new DynamicTextLabel(newLabelText, Color.White, pos + new Vector3(0, 0, 1.2f), 5.0f, null, streamdistance: LabelStreamDistance);
             data.Label.World = data.VirtualWorld;
             data.Label.Interior = data.Interior;
         }
@@ -231,7 +260,6 @@ namespace ProjectSMP.Features.Jobs.Side.Trashmaster.DynamicTrash
             if (!player.IsCharLoaded) return;
             var trashId = CheckPlayerInTrash(player);
             if (trashId == -1) return;
-            // Reserved for Trashmaster job interaction
         }
 
         public static void StartEdit(Player player, int id)
@@ -278,7 +306,8 @@ namespace ProjectSMP.Features.Jobs.Side.Trashmaster.DynamicTrash
         public static DynamicTrashData GetTrash(int id) =>
             Trashes.TryGetValue(id, out var data) ? data : null;
 
-        public static List<int> GetAvailableTrashIds() {
+        public static List<int> GetAvailableTrashIds()
+        {
             return new List<int>(Trashes.Where(kvp => kvp.Value.Amount > 0).Select(kvp => kvp.Key));
         }
 
@@ -286,9 +315,45 @@ namespace ProjectSMP.Features.Jobs.Side.Trashmaster.DynamicTrash
 
         private static void DestroyObjects(DynamicTrashData data)
         {
-            if (data.ColDCIndex >= 0) { ColAndreasDynamicObjectManager.DestroyObject(data.ColDCIndex); data.ColDCIndex = -1; }
-            data.Label?.Dispose();
-            data.Polygon?.Clear();
+            if (data.ColDCIndex >= 0)
+            {
+                try
+                {
+                    ColAndreasDynamicObjectManager.DestroyObject(data.ColDCIndex);
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine($"[TrashService] Error destroying ColAndreas object for trash {data.Id}: {ex.Message}");
+                }
+                data.ColDCIndex = -1;
+            }
+
+            if (data.Label != null)
+            {
+                try
+                {
+                    data.Label.Dispose();
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine($"[TrashService] Error disposing label for trash {data.Id}: {ex.Message}");
+                }
+                data.Label = null;
+            }
+
+            if (data.Polygon != null)
+            {
+                try
+                {
+                    data.Polygon.Clear();
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine($"[TrashService] Error clearing polygon for trash {data.Id}: {ex.Message}");
+                }
+                data.Polygon = null;
+            }
+
             TrashGridManager.Remove(data.Id, data.PosX, data.PosY);
         }
 
