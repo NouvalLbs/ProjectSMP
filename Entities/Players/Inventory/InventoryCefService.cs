@@ -13,11 +13,21 @@ namespace ProjectSMP.Entities.Players.Inventory
     {
         public static void HandleOpen(Player player)
         {
-            if (!player.IsCharLoaded || player.InventoryData == null) return;
+            // DEBUG: hapus setelah masalah ketemu
+            Console.WriteLine($"[INV] HandleOpen => Player={player.Name}, IsCharLoaded={player.IsCharLoaded}, InventoryData={(player.InventoryData == null ? "NULL" : "OK")}");
+
+            if (!player.IsCharLoaded || player.InventoryData == null)
+            {
+                Console.WriteLine($"[INV] HandleOpen SKIPPED: IsCharLoaded={player.IsCharLoaded}, InventoryData={player.InventoryData == null}");
+                return;
+            }
+
             InventoryService.Organize(player);
             InventoryService.SyncMoneyToInventory(player);
             InventoryService.RemoveExpiredItems(player);
             SendInventoryData(player);
+
+            Console.WriteLine($"[INV] SendInventoryData sent for player={player.Name}");
         }
 
         public static void HandleClose(Player player) { }

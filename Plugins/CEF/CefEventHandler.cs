@@ -17,57 +17,69 @@ public static class CefEventHandler
         var player = BasePlayer.Find(playerId) as Player;
         if (player == null) return;
 
+        Console.WriteLine($"[CEF] Handle: player={playerId} event={eventName} payload={payload}");
+
         try
         {
-            using var doc = JsonDocument.Parse(payload);
-            var root = doc.RootElement;
-            var e = root.GetProperty("e").GetString() ?? "";
-            var d = root.GetProperty("d");
+            using var doc = JsonDocument.Parse(payload.Length > 0 ? payload : "{}");
+            var d = doc.RootElement;
 
-            switch (e)
+            switch (eventName)
             {
                 case "uiReady":
                     HandleUiReady(player);
                     break;
+
                 case "inv:open":
                     InventoryCefService.HandleOpen(player);
+                    CefService.FocusBrowser(player.Id, 1, true);
                     break;
+
                 case "inv:close":
                     InventoryCefService.HandleClose(player);
+                    CefService.FocusBrowser(player.Id, 1, false);
                     break;
+
                 case "inv:move":
                     InventoryCefService.HandleMove(player,
                         d.GetProperty("fromIndex").GetInt32(),
                         d.GetProperty("toIndex").GetInt32(),
                         d.GetProperty("amount").GetInt32());
                     break;
+
                 case "inv:action":
                     InventoryCefService.HandleAction(player,
                         d.GetProperty("action").GetString() ?? "",
                         d.GetProperty("index").GetInt32(),
                         d.GetProperty("amount").GetInt32());
                     break;
+
                 case "inv:give_request":
                     InventoryCefService.HandleGiveRequest(player,
                         d.GetProperty("index").GetInt32(),
                         d.GetProperty("amount").GetInt32());
                     break;
+
                 case "inv:give_confirm":
                     InventoryCefService.HandleGiveConfirm(player,
                         d.GetProperty("index").GetInt32(),
                         d.GetProperty("amount").GetInt32(),
                         d.GetProperty("targetId").GetInt32());
                     break;
+
+                default:
+                    Console.WriteLine($"[CEF] Unknown event: {eventName}");
+                    break;
             }
         }
-        catch
+        catch (Exception ex)
         {
-            Console.WriteLine($"[CEF] Failed to parse event from player {playerId}");
+            Console.WriteLine($"[CEF] Error handling '{eventName}': {ex.Message}");
         }
     }
 
     private static void HandleUiReady(Player player)
     {
-        Console.WriteLine($"[CEF] UI Ready for player {player.Name}");
+        Console.WriteLine($"[CEF] UI Ready: {player.Name}");
     }
 }
