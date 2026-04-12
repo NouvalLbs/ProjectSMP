@@ -40,7 +40,6 @@ public class AnticheatConfig
         ["GodModeOnfoot"] = new() { MaxWarnings = 3 },
         ["GodModeVehicle"] = new() { MaxWarnings = 3 },
         ["InvisibleHack"] = new() { MaxWarnings = 3 },
-        ["CameraHack"] = new() { MaxWarnings = 3 },
         ["AnimationHack"] = new() { MaxWarnings = 3 },
         ["CjRun"] = new() { MaxWarnings = 8 },
         ["LagCompSpoof"] = new() { MaxWarnings = 2 },

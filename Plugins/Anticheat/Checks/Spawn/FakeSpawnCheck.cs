@@ -49,5 +49,6 @@ public class FakeSpawnCheck
         st.Health = player.Health;
         st.Armour = player.Armour;
         st.Money = player.Money;
+        st.LastVehicleZAngle = -1f;
     }
 }

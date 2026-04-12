@@ -1,4 +1,5 @@
 ﻿using ProjectSMP;
+using ProjectSMP.Entities.Players.Inventory;
 using ProjectSMP.Plugins.CEF;
 using SampSharp.GameMode.World;
 using System;
@@ -21,12 +22,41 @@ public static class CefEventHandler
             using var doc = JsonDocument.Parse(payload);
             var root = doc.RootElement;
             var e = root.GetProperty("e").GetString() ?? "";
-            var d = root.GetProperty("d").GetRawText();
+            var d = root.GetProperty("d");
 
             switch (e)
             {
                 case "uiReady":
                     HandleUiReady(player);
+                    break;
+                case "inv:open":
+                    InventoryCefService.HandleOpen(player);
+                    break;
+                case "inv:close":
+                    InventoryCefService.HandleClose(player);
+                    break;
+                case "inv:move":
+                    InventoryCefService.HandleMove(player,
+                        d.GetProperty("fromIndex").GetInt32(),
+                        d.GetProperty("toIndex").GetInt32(),
+                        d.GetProperty("amount").GetInt32());
+                    break;
+                case "inv:action":
+                    InventoryCefService.HandleAction(player,
+                        d.GetProperty("action").GetString() ?? "",
+                        d.GetProperty("index").GetInt32(),
+                        d.GetProperty("amount").GetInt32());
+                    break;
+                case "inv:give_request":
+                    InventoryCefService.HandleGiveRequest(player,
+                        d.GetProperty("index").GetInt32(),
+                        d.GetProperty("amount").GetInt32());
+                    break;
+                case "inv:give_confirm":
+                    InventoryCefService.HandleGiveConfirm(player,
+                        d.GetProperty("index").GetInt32(),
+                        d.GetProperty("amount").GetInt32(),
+                        d.GetProperty("targetId").GetInt32());
                     break;
             }
         }

@@ -83,6 +83,12 @@ public class PlayerAcState
     public bool PendingVehicleDamageResult { get; set; }
     public bool PendingClassResult { get; set; }
 
+    public float LastVehicleZAngle { get; set; } = -1f;
+    public float LastVehicleSpeed { get; set; }
+    public float LastVehVelX { get; set; }
+    public float LastVehVelY { get; set; }
+    public float LastVehVelZ { get; set; }
+
     // ── Anti-NOP: GivePlayerWeapon ───────────────────────────────────────
     public int[] NopSetWeapon { get; } = Enumerable.Repeat(-1, 13).ToArray();
     public long[] NopSetWeaponDeadline { get; } = new long[13];

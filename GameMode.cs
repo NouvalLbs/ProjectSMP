@@ -69,6 +69,8 @@ namespace ProjectSMP
             CefService.OnBrowserCreated += (playerId, browserId, statusCode) =>
             {
                 Console.WriteLine($"[CEF] Browser created: player={playerId} browser={browserId} status={statusCode}");
+                if (statusCode == 200 && browserId == 1)
+                    CefService.AlwaysListenKeys(playerId, browserId, true);
             };
 
             CefEventHandler.Initialize();

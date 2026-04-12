@@ -80,7 +80,6 @@ public class AnticheatPlugin : IDisposable
     private UnFreezeCheck _unFreeze = null!;
     private FakeNpcCheck _fakeNpc = null!;
     private AfkGhostCheck _afkGhost = null!;
-    private CameraHackCheck _cameraHack = null!;
     private AnimationHackCheck _animationHack = null!;
 
     // ── Anti-NOP ─────────────────────────────────────────────────────────
@@ -139,7 +138,7 @@ public class AnticheatPlugin : IDisposable
         _fakeKill = new FakeKillCheck(_players, _warnings, _config);
         _rapidFire = new RapidFireCheck(_players, _warnings, _config);
         _proAim = new ProAimCheck(_players, _warnings, _config);
-        _quickTurn = new QuickTurnCheck(_players, _warnings, _config);
+        _quickTurn = new QuickTurnCheck(_players, _vehicles, _warnings, _config);
         _lagComp = new LagCompSpoofCheck(_players, _warnings, _config);
         _carShot = new CarShotCheck(_players, _warnings, _config);
         _fullAiming = new FullAimingCheck(_players, _warnings, _config);
@@ -165,7 +164,6 @@ public class AnticheatPlugin : IDisposable
         _unFreeze = new UnFreezeCheck(_players, _warnings, _config);
         _fakeNpc = new FakeNpcCheck(_config, _logger);
         _afkGhost = new AfkGhostCheck(_players, _warnings, _config);
-        _cameraHack = new CameraHackCheck(_players, _warnings, _config);
         _animationHack = new AnimationHackCheck(_players, _warnings, _config);
 
         _nopGiveWeapon = new NopGiveWeaponCheck(_players, _warnings, _config);
@@ -208,8 +206,10 @@ public class AnticheatPlugin : IDisposable
         };
     }
 
-    public static AnticheatPlugin Create(string configPath = "scriptfiles/AntiCheat.json", bool weaponConfigMode = false) {
+    public static AnticheatPlugin Create(string configPath = "scriptfiles/AntiCheat.json", bool weaponConfigMode = false)
+    {
         var cfg = LoadConfig(configPath);
+
         var players = new PlayerStateManager();
         var vehicles = new VehicleStateManager();
         var pickups = new PickupStateManager();
@@ -257,8 +257,10 @@ public class AnticheatPlugin : IDisposable
     public void OnSetPlayerAmmo(int playerId, int weaponId, int ammo)
         => _nopSetAmmo.OnSetPlayerAmmo(playerId, weaponId, ammo);
 
-    public void OnSetPlayerInterior(int playerId, int interiorId) {
+    public void OnSetPlayerInterior(int playerId, int interiorId)
+    {
         var p = BasePlayer.Find(playerId);
+
         if (p is null) return;
 
         int oldInterior = p.Interior;
@@ -272,8 +274,10 @@ public class AnticheatPlugin : IDisposable
         _nopSetAmmo.OnWeaponsReset(playerId);
     }
 
-    public void OnSetPlayerSpecialAction(int playerId, int action) {
+    public void OnSetPlayerSpecialAction(int playerId, int action)
+    {
         _specialAction.OnSpecialActionSet(playerId, action);
+
         _nopSetSpecialAction.OnSetPlayerSpecialAction(playerId, action);
     }
 
@@ -339,7 +343,8 @@ public class AnticheatPlugin : IDisposable
         }
 
         var veh = BaseVehicle.Find(vehicleId);
-        if (veh is not null) {
+        if (veh is not null)
+        {
             var pos = veh.Position;
             GetVehicleZAngle(vehicleId, out float angle);
             _vehicles.SetSpawnPosition(vehicleId, pos.X, pos.Y, pos.Z, angle);
@@ -369,8 +374,10 @@ public class AnticheatPlugin : IDisposable
         if (st is not null) st.StuntBonusEnabled = enable;
     }
 
-    public void OnPlayerSpectatePlayerOrVehicle(int playerId) {
+    public void OnPlayerSpectatePlayerOrVehicle(int playerId)
+    {
         var st = _players.Get(playerId);
+
         if (st is null) return;
         st.SpectateTick = Environment.TickCount64 + 2650;
     }
@@ -384,8 +391,10 @@ public class AnticheatPlugin : IDisposable
         _nopSetArmour.OnSetPlayerArmour(playerId, armour);
     }
 
-    public void OnSetPlayerPos(int playerId, float x, float y, float z) {
+    public void OnSetPlayerPos(int playerId, float x, float y, float z)
+    {
         var st = _players.Get(playerId);
+
         if (st is null) return;
         st.SetPosTick = Environment.TickCount64;
         _nopSetPos.OnSetPlayerPos(playerId, x, y, z);
@@ -422,7 +431,8 @@ public class AnticheatPlugin : IDisposable
         st.VehicleId = vehicleId;
         st.PutInVehicleTick = Environment.TickCount64;
         var vpos = BaseVehicle.Find(vehicleId)?.Position;
-        if (vpos is not null) {
+        if (vpos is not null)
+        {
             st.PutInVehiclePosX = vpos.Value.X;
             st.PutInVehiclePosY = vpos.Value.Y;
             st.PutInVehiclePosZ = vpos.Value.Z;
@@ -430,10 +440,14 @@ public class AnticheatPlugin : IDisposable
         _nopPutInVehicle.OnPutPlayerInVehicle(playerId, vehicleId, seatId);
     }
 
-    public void OnTogglePlayerSpectating(int playerId, bool toggle) {
+    public void OnTogglePlayerSpectating(int playerId, bool toggle)
+    {
         var st = _players.Get(playerId);
-        if (st is not null) {
-            st.SpectateTick = Environment.TickCount64;
+
+        if (st is not null)
+        {
+            st.SpectateTick
+        = Environment.TickCount64;
             st.IsSpectating = toggle;
         }
         _nopToggleSpectating.OnTogglePlayerSpectating(playerId, toggle);
@@ -458,16 +472,22 @@ public class AnticheatPlugin : IDisposable
         if (p is not null) _attachCrasher.ValidateAttachedObject(p, slot, modelId);
     }
 
-    public void OnRegisterPickup(int pickupId, float x, float y, float z, int type = 0, int weapon = 0, int amount = 0) {
+    public void OnRegisterPickup(int pickupId, float x, float y, float z, int type = 0, int weapon = 0, int amount = 0)
+    {
         _pickups.Register(pickupId, x, y, z, type, weapon, amount);
+
     }
 
-    public void OnDestroyPickup(int pickupId) {
+    public void OnDestroyPickup(int pickupId)
+    {
         _pickups.Remove(pickupId);
+
     }
 
-    public void OnSpawnPlayer(int playerId) {
+    public void OnSpawnPlayer(int playerId)
+    {
         var st = _players.Get(playerId);
+
         if (st is not null) st.SpawnSetFlag = 1;
         _nopSpawnPlayer.OnSpawnPlayer(playerId);
     }
@@ -509,7 +529,8 @@ public class AnticheatPlugin : IDisposable
     {
         InitChecks();
 
-        if (_weaponConfigMode) {
+        if (_weaponConfigMode)
+        {
             Integration.WeaponConfigBridge.Initialize(_players);
         }
 
@@ -551,8 +572,10 @@ public class AnticheatPlugin : IDisposable
         gm.RconLoginAttempt += OnRconLoginAttempt;
 
         _timer = new System.Timers.Timer(5000);
-        _timer.Elapsed += (_, _) => {
+        _timer.Elapsed += (_, _) =>
+        {
             _ping.Tick();
+
             _afkGhost.Tick();
         };
         _timer.AutoReset = true;
@@ -600,14 +623,18 @@ public class AnticheatPlugin : IDisposable
         if (!_dos.OnPlayerUpdate(p)) return;
         _airBreak.OnPlayerUpdate(p);
         _teleport.OnPlayerUpdate(p);
-        if (p.Vehicle is not null && p.State == PlayerState.Driving) {
+        if (p.Vehicle is not null && p.State == PlayerState.Driving)
+        {
             var veh = p.Vehicle;
+
             var vst = _vehicles.Get(veh.Id);
-            if (vst is not null) {
+            if (vst is not null)
+            {
                 var vel = veh.Velocity;
                 var pos = veh.Position;
 
-                if (VehicleData.IsTrailer((int)veh.Model)) {
+                if (VehicleData.IsTrailer((int)veh.Model))
+                {
                     vst.TrSpeed = (int)(VectorMath.Speed(vel.X, vel.Y, vel.Z) * 100.0f);
                     vst.TrPosDiff = VectorMath.Dist(pos.X, pos.Y, pos.Z, vst.TrPosX, vst.TrPosY, vst.TrPosZ);
                     vst.TrPosX = pos.X;
@@ -616,7 +643,9 @@ public class AnticheatPlugin : IDisposable
                     vst.TrVelX = vel.X;
                     vst.TrVelY = vel.Y;
                     vst.TrVelZ = vel.Z;
-                } else {
+                }
+                else
+                {
                     vst.TrSpeed = -1;
                     vst.TrSpeedDiff = 0;
                 }
@@ -636,13 +665,13 @@ public class AnticheatPlugin : IDisposable
         _weaponCrasher.OnPlayerUpdate(p);
         _specialAction.OnPlayerUpdate(p);
         _invisible.OnPlayerUpdate(p);
-        _cameraHack.OnPlayerUpdate(p);
         _animationHack.OnPlayerUpdate(p);
         _parkourMod.OnPlayerUpdate(p);
         _unFreeze.OnPlayerUpdate(p);
 
         var st = _players.Get(p.Id);
-        if (st is not null) {
+        if (st is not null)
+        {
             st.CamMode = (int)p.CameraMode;
             st.Anim = p.AnimationIndex;
 
@@ -889,8 +918,10 @@ public class AnticheatPlugin : IDisposable
     }
     */
 
-    private void OnPlayerKeyStateChange(object? sender, KeyStateChangedEventArgs e) {
+    private void OnPlayerKeyStateChange(object? sender, KeyStateChangedEventArgs e)
+    {
         if (sender is not BasePlayer p) return;
+
     }
 
     private void OnVehicleMod(object? sender, VehicleModEventArgs e)
@@ -915,8 +946,10 @@ public class AnticheatPlugin : IDisposable
         st.IsInModShop = e.EnterExit == EnterExit.Entered;
     }
 
-    private void OnVehiclePaintjob(object? sender, VehiclePaintjobEventArgs e) {
+    private void OnVehiclePaintjob(object? sender, VehiclePaintjobEventArgs e)
+    {
         if (sender is not BaseVehicle v) return;
+
         if (e.Player is not BasePlayer p) return;
         if (!_cbFlood.Check(p, 13)) return;
     }
@@ -935,9 +968,13 @@ public class AnticheatPlugin : IDisposable
         _cbFlood.Check(p, 15);
         int model = (int)v.Model;
         long graceUntil = Environment.TickCount64 + 2650;
-        foreach (var (_, st) in _players.All) {
-            if (st.VehicleId == v.Id) {
-                st.LastVehicleModel = model;
+        foreach (var (_, st) in _players.All)
+        {
+            if (st.VehicleId == v.Id)
+            {
+
+                st.LastVehicleModel =
+            model;
                 st.SetPosTick = graceUntil;
                 st.RemoveFromVehicleTick = graceUntil;
                 st.VehicleId = -1;
@@ -961,8 +998,10 @@ public class AnticheatPlugin : IDisposable
         _cbFlood.Check(p, 25);
     }
 
-    private void OnDialogResponse(object? sender, DialogResponseEventArgs e) {
+    private void OnDialogResponse(object? sender, DialogResponseEventArgs e)
+    {
         if (sender is not BasePlayer p) return;
+
         if (!_cbFlood.Check(p, 0)) return;
         _dialogCrasher.OnDialogResponse(p, e);
     }
@@ -995,24 +1034,33 @@ public class AnticheatPlugin : IDisposable
         }
     }
 
-    public void UpdateCheckConfig(string checkName, Action<CheckConfig> configure) {
+    public void UpdateCheckConfig(string checkName, Action<CheckConfig> configure)
+    {
         var check = _config.GetCheck(checkName);
+
         configure(check);
         _logger.Log($"Check '{checkName}' configuration updated");
     }
 
-    private void GetVehicleZAngle(int vehicleId, out float angle) {
+    private void GetVehicleZAngle(int vehicleId, out float angle)
+    {
         var veh = BaseVehicle.Find(vehicleId);
-        if (veh is not null) {
+
+        if (veh is not null)
+        {
             var rot = veh.Rotation;
             angle = rot.Z;
-        } else {
+        }
+        else
+        {
             angle = 0.0f;
         }
     }
 
-    public void Dispose() {
-        if (_weaponConfigMode) {
+    public void Dispose()
+    {
+        if (_weaponConfigMode)
+        {
             Integration.WeaponConfigBridge.Shutdown();
         }
 

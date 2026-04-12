@@ -26,6 +26,7 @@ namespace ProjectSMP.Features.Jobs.Side.Trashmaster
         private const int CollectDuration = 5;
         private const int AttachmentIndex = 4;
         private const float CpSize = 6.0f;
+        private const float CpSizeTrunk = 2.5f;
 
         private static readonly HashSet<int> _vehicleIds = new();
         private static readonly Dictionary<int, TrashmasterSession> _sessions = new();
@@ -182,18 +183,21 @@ namespace ProjectSMP.Features.Jobs.Side.Trashmaster
         private static void ShowBriefing(Player player)
         {
             const string text =
-                "{FFFFFF}Kamu ditugaskan untuk membantu proses pengangkutan sampah di wilayah kota Los Santos. " +
-                "Mulailah dengan menuju kendaraan Trashmaster, lalu masuk ke dalamnya untuk memulai pekerjaan.\n\n" +
-                "Setelah siap, sistem akan mengarahkan kamu ke beberapa titik lokasi sampah melalui waypoint yang telah ditentukan. " +
-                "Bawa kendaraan mendekati area tersebut untuk melakukan proses pengambilan sampah. " +
-                "Tekan tombol {FFFF00}Y{FFFFFF} saat berada di lokasi agar sampah dapat dimuat ke kendaraan.\n\n" +
-                "Setelah sampah berhasil dikumpulkan, lanjutkan dengan menuju bagian belakang kendaraan Trashmaster " +
-                "untuk membuang muatan yang telah diambil.\n\n" +
-                "{FFFF00}Catatan:\n{FFFFFF}" +
-                "Perhatikan indikator Trash Garbage Bin yang menunjukkan jumlah sampah yang sudah berhasil dikumpulkan. " +
-                "Jika masih belum penuh, lanjutkan perjalanan ke titik sampah berikutnya yang tersedia.\n" +
-                "Apabila indikator menunjukkan jumlah maksimum, berarti seluruh tugas pengangkutan telah selesai " +
-                "dan pekerjaan dapat diakhiri.";
+            "{FFFFFF}Kamu ditugaskan untuk membantu proses pengangkutan sampah di wilayah kota Los Santos.\n " +
+            "Mulailah dengan menuju kendaraan Trashmaster, lalu masuk ke dalamnya untuk memulai pekerjaan.\n\n" +
+
+            "Setelah siap, sistem akan mengarahkan kamu ke beberapa titik lokasi sampah melalui waypoint yang telah ditentukan.\n " +
+            "Bawa kendaraan mendekati area tersebut untuk melakukan proses pengambilan sampah.\n " +
+            "Tekan tombol {FFFF00}Y{FFFFFF} saat berada di lokasi agar sampah dapat dimuat ke kendaraan.\n\n" +
+
+            "Setelah sampah berhasil dikumpulkan, lanjutkan dengan menuju bagian belakang kendaraan Trashmaster\n " +
+            "untuk membuang muatan yang telah diambil.\n\n" +
+
+            "{FFFF00}Catatan:{FFFFFF}\n" +
+            "Perhatikan indikator Trash Garbage Bin yang menunjukkan jumlah sampah yang sudah berhasil dikumpulkan.\n " +
+            "Jika masih belum penuh, lanjutkan perjalanan ke titik sampah berikutnya yang tersedia.\n " +
+            "Apabila indikator menunjukkan jumlah maksimum, berarti seluruh tugas pengangkutan telah selesai\n " +
+            "dan pekerjaan dapat diakhiri.";
 
             player.ShowMessage("Los Santos Waste Management", text)
                 .WithButtons("Mulai", "Batal")
@@ -245,9 +249,6 @@ namespace ProjectSMP.Features.Jobs.Side.Trashmaster
 
             var pos = new Vector3(trash.PosX, trash.PosY, trash.PosZ);
             SetCheckpoint(player, pos, pos, CheckpointType.Finish);
-
-            player.SendClientMessage(Color.White,
-                $"{Msg.Trashmaster} Menuju lokasi sampah! Turun lalu tekan {{FFFF00}}Y{{FFFFFF}} untuk mengambil. ({session.TrashCollected}/{MaxTrash})");
         }
 
         private static void StartCollecting(Player player, TrashmasterSession session, int trashId)
@@ -277,7 +278,7 @@ namespace ProjectSMP.Features.Jobs.Side.Trashmaster
 
                 var trunkPos = EVFVehiclePart.GetPosNearVehiclePart(sess.VehicleId, VehiclePart.Trunk, 0.5f);
                 sess.Phase = TrashmasterPhase.GoToTrunk;
-                SetCheckpoint(player, trunkPos, trunkPos, CheckpointType.Finish);
+                SetCheckpoint(player, trunkPos, trunkPos, CheckpointType.Finish, CpSizeTrunk);
 
                 player.SendClientMessage(Color.White,
                     $"{Msg.Trashmaster} Sampah diambil! Bawa ke bagian belakang kendaraan.");
@@ -312,7 +313,7 @@ namespace ProjectSMP.Features.Jobs.Side.Trashmaster
                     sess.Phase = TrashmasterPhase.GoToDropout;
                     SetCheckpoint(player, DropoutPos, DropoutPos, CheckpointType.Finish);
                     player.SendClientMessage(Color.White,
-                        $"{Msg.Trashmaster} Semua sampah terkumpul! Menuju titik pembuangan. Tekan {{FFFF00}}H{{FFFFFF}} saat tiba.");
+                        $"{Msg.Trashmaster} Semua sampah terkumpul! Menuju titik pembuangan.");
                 }
                 else
                 {
@@ -356,10 +357,10 @@ namespace ProjectSMP.Features.Jobs.Side.Trashmaster
                 player.RemoveAttachedObject(AttachmentIndex);
         }
 
-        private static void SetCheckpoint(Player player, Vector3 pos, Vector3 next, CheckpointType type)
+        private static void SetCheckpoint(Player player, Vector3 pos, Vector3 next, CheckpointType type, float size = CpSize)
         {
             ClearCheckpoint(player.Id);
-            var cp = new DynamicRaceCheckpoint(type, pos, next, CpSize, -1, -1, player, 1500.0f);
+            var cp = new DynamicRaceCheckpoint(type, pos, next, size, -1, -1, player, 1500.0f);
             cp.Enter += (s, e) =>
             {
                 if (e.Player != player || !_sessions.TryGetValue(player.Id, out var session)) return;
@@ -368,7 +369,7 @@ namespace ProjectSMP.Features.Jobs.Side.Trashmaster
                     case TrashmasterPhase.GoToTrash:
                         ClearCheckpoint(player.Id);
                         player.SendClientMessage(Color.White,
-                            $"{Msg.Trashmaster} Kamu telah tiba! Turun lalu tekan {{FFFF00}}Y{{FFFFFF}} untuk mengambil sampah.");
+                            $"{Msg.Trashmaster} Kamu telah tiba! Silahkan ambil sampah di tempat sampah.");
                         break;
                     case TrashmasterPhase.GoToTrunk:
                         DumpToTruck(player, session);
@@ -376,7 +377,7 @@ namespace ProjectSMP.Features.Jobs.Side.Trashmaster
                     case TrashmasterPhase.GoToDropout:
                         ClearCheckpoint(player.Id);
                         player.SendClientMessage(Color.White,
-                            $"{Msg.Trashmaster} Kamu telah tiba di titik pembuangan! Tekan {{FFFF00}}H{{FFFFFF}} untuk drop sampah.");
+                            $"{Msg.Trashmaster} Kamu telah tiba di titik pembuangan.");
                         break;
                 }
             };
