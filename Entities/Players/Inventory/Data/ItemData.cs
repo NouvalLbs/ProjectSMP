@@ -5,5 +5,6 @@
         public string ItemName { get; set; } = "";
         public int Amount { get; set; }
         public long Durability { get; set; }
+        public int Slot { get; set; } = -1;
     }
 }

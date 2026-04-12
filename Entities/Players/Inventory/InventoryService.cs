@@ -29,6 +29,10 @@ namespace ProjectSMP.Entities.Players.Inventory
                 };
             }
 
+            var inv = player.InventoryData.Inventory;
+            for (int i = 0; i < inv.Count; i++)
+                if (inv[i].Slot < 0) inv[i].Slot = i;
+
             SyncMoneyToInventory(player);
             RemoveExpiredItems(player);
         }
@@ -90,7 +94,8 @@ namespace ProjectSMP.Entities.Players.Inventory
                 {
                     ItemName = itemName,
                     Amount = Math.Min(amount, def.ItemStack),
-                    Durability = durability
+                    Durability = durability,
+                    Slot = FindFreeSlot(player)
                 };
                 inventory.Add(newItem);
                 amount -= newItem.Amount;
@@ -138,6 +143,15 @@ namespace ProjectSMP.Entities.Players.Inventory
             return false;
         }
 
+        public static bool RemoveItemBySlot(Player player, int slot, int amount)
+        {
+            var item = player.InventoryData.Inventory.FirstOrDefault(i => i.Slot == slot);
+            if (item == null) return false;
+            if (item.Amount <= amount) { player.InventoryData.Inventory.Remove(item); return true; }
+            item.Amount -= amount;
+            return true;
+        }
+
         public static int GetItemCount(Player player, string itemName)
         {
             return player.InventoryData.Inventory
@@ -167,13 +181,29 @@ namespace ProjectSMP.Entities.Players.Inventory
             inventory.Clear();
             if (money != null) inventory.Add(money);
             inventory.AddRange(sorted);
+
+            for (int i = 0; i < inventory.Count; i++)
+                inventory[i].Slot = i;
         }
 
         public static void SyncMoneyToInventory(Player player)
         {
+            var moneySlot = player.InventoryData.Inventory
+                .FirstOrDefault(i => i.ItemName == "Money")?.Slot ?? -1;
+
             RemoveItem(player, "Money", GetItemCount(player, "Money"));
+
             if (player.CharMoney > 0)
-                AddItem(player, "Money", player.CharMoney, 0);
+            {
+                var slot = moneySlot >= 0 ? moneySlot : FindFreeSlot(player);
+                player.InventoryData.Inventory.Add(new ItemData
+                {
+                    ItemName = "Money",
+                    Amount = player.CharMoney,
+                    Durability = 0,
+                    Slot = slot
+                });
+            }
         }
 
         public static void RemoveExpiredItems(Player player)
@@ -219,7 +249,6 @@ namespace ProjectSMP.Entities.Players.Inventory
             for (int i = 0; i < grouped.Count; i++)
             {
                 var item = grouped[i];
-                var def = ItemDatabase.Get(item.Name);
                 var durText = item.Mixed ? "Mixed" : GetDurabilityText(player, item.Name);
 
                 if (item.Name == "Money")
@@ -258,9 +287,7 @@ namespace ProjectSMP.Entities.Players.Inventory
                     var selectedGroup = grp[e.ListItem];
 
                     if (selectedGroup.Mixed)
-                    {
                         ShowMixedItemDialog(player, selectedName);
-                    }
                     else
                     {
                         var firstIndex = player.InventoryData.Inventory.FindIndex(i => i.ItemName == selectedName);
@@ -345,18 +372,10 @@ namespace ProjectSMP.Entities.Players.Inventory
 
             switch (action)
             {
-                case "Use":
-                    UseItem(player, itemName, index);
-                    break;
-                case "Give":
-                    ShowGiveDialog(player);
-                    break;
-                case "Drop":
-                    ShowDropDialog(player);
-                    break;
-                case "Detail":
-                    ShowDetailDialog(player);
-                    break;
+                case "Use": UseItem(player, itemName, index); break;
+                case "Give": ShowGiveDialog(player); break;
+                case "Drop": ShowDropDialog(player); break;
+                case "Detail": ShowDetailDialog(player); break;
             }
         }
 
@@ -394,26 +413,25 @@ namespace ProjectSMP.Entities.Players.Inventory
             ApplyItemEffect(player, itemName, index);
         }
 
-        public static void OnItemUseComplete(Player player, string itemName, int index)
+        public static void OnItemUseComplete(Player player, string itemName, int slot)
         {
-            ApplyItemEffect(player, itemName, index);
+            ApplyItemEffect(player, itemName, slot);
         }
 
-        private static void ApplyItemEffect(Player player, string itemName, int index)
+        private static void ApplyItemEffect(Player player, string itemName, int slot)
         {
-            var inventory = player.InventoryData.Inventory;
-            if (index < 0 || index >= inventory.Count) return;
+            var item = player.InventoryData.Inventory.FirstOrDefault(i => i.Slot == slot);
+            if (item == null) return;
 
             switch (itemName)
             {
                 case "Snack":
-                    RemoveItemByIndex(player, index, 1);
+                    RemoveItemBySlot(player, slot, 1);
                     player.Vitals.Hunger = Math.Min(100, player.Vitals.Hunger + 10);
                     player.SendClientMessage(Color.White, $"{Msg.Inventory} Kamu mengkonsumsi Snack! {{fd9804}}+10 Hunger");
                     break;
-
                 case "Sprunk":
-                    RemoveItemByIndex(player, index, 1);
+                    RemoveItemBySlot(player, slot, 1);
                     player.Vitals.Energy = Math.Min(100, player.Vitals.Energy + 10);
                     player.SendClientMessage(Color.White, $"{Msg.Inventory} Kamu meminum Sprunk! {{00c5f6}}+10 Thirst");
                     break;
@@ -608,13 +626,20 @@ namespace ProjectSMP.Entities.Players.Inventory
             if (item == null || item.Durability <= 0) return "-";
 
             var now = DateTimeOffset.UtcNow.ToUnixTimeSeconds();
-            var startTime = item.Durability - def.DurabilityDuration;
             var remaining = item.Durability - now;
 
             if (remaining <= 0) return "{FF0000}0%";
 
             var percent = (remaining * 100) / def.DurabilityDuration;
             return $"{percent}%";
+        }
+
+        private static int FindFreeSlot(Player player)
+        {
+            var used = player.InventoryData.Inventory.Select(i => i.Slot).ToHashSet();
+            for (int i = 0; i < player.InventoryData.Slots; i++)
+                if (!used.Contains(i)) return i;
+            return -1;
         }
 
         private static int CalculateRequiredSlots(Player player, string itemName, int amount)

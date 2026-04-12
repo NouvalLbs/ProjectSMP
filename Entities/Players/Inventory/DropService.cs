@@ -3,6 +3,7 @@ using ProjectSMP.Entities.Players.Inventory.Data;
 using ProjectSMP.Extensions;
 using SampSharp.GameMode.SAMP;
 using SampSharp.Streamer.World;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 
@@ -93,17 +94,8 @@ namespace ProjectSMP.Entities.Players.Inventory
 
                     player.SendClientMessage(SampSharp.GameMode.SAMP.Color.White, $"{Msg.Inventory} Kamu mengambil {{ebe6ae}}{item.ItemName}{{FFFFFF}} x{item.Amount}.");
 
-                    if (dp.Items.Count == 0)
-                    {
-                        dp.Label?.Dispose();
-                        DropPoints.Remove(dp);
-                        player.SetData<DropPointData>("CurrentDropPoint", null);
-                    }
-                    else
-                    {
-                        UpdateLabel(dp);
-                        ShowDropPointItems(player, dp);
-                    }
+                    CheckAndCleanup(dp);
+                    if (dp.Items.Count > 0) ShowDropPointItems(player, dp);
                 });
         }
 
@@ -127,6 +119,44 @@ namespace ProjectSMP.Entities.Players.Inventory
 
             var percent = (remaining * 100) / def.DurabilityDuration;
             return $"{percent}%";
+        }
+
+        public static object GetDropPointCefData(Player player)
+        {
+            var dp = GetNearestDropPoint(player);
+            if (dp == null) return null;
+
+            const int slotCount = 20;
+            var slots = new object[slotCount];
+            for (int i = 0; i < dp.Items.Count && i < slotCount; i++)
+            {
+                var item = dp.Items[i];
+                var def = ItemDatabase.Get(item.ItemName);
+                slots[i] = new
+                {
+                    index = i,
+                    name = item.ItemName,
+                    count = item.Amount,
+                    weight = def != null ? (float)Math.Round(def.Weight / 1000f, 3) : 0f,
+                    durability = -1,
+                    type = def?.ItemType ?? "Unknown"
+                };
+            }
+
+            return new { hasDropPoint = true, slotCount, items = slots };
+        }
+
+        public static void CheckAndCleanup(DropPointData dp)
+        {
+            if (dp.Items.Count == 0)
+            {
+                dp.Label?.Dispose();
+                DropPoints.Remove(dp);
+            }
+            else
+            {
+                UpdateLabel(dp);
+            }
         }
     }
 }

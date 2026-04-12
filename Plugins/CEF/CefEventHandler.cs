@@ -67,6 +67,25 @@ public static class CefEventHandler
                         d.GetProperty("targetId").GetInt32());
                     break;
 
+                case "inv:drop_to_inv":
+                    InventoryCefService.HandleDropToInv(player,
+                        d.GetProperty("dropSlot").GetInt32(),
+                        d.GetProperty("toSlot").GetInt32(),
+                        d.GetProperty("amount").GetInt32());
+                    break;
+
+                case "inv:inv_to_drop":
+                    InventoryCefService.HandleInvToDrop(player,
+                        d.GetProperty("fromSlot").GetInt32(),
+                        d.GetProperty("amount").GetInt32());
+                    break;
+
+                case "inv:drop_take":
+                    InventoryCefService.HandleDropTake(player,
+                        d.GetProperty("slot").GetInt32(),
+                        d.GetProperty("amount").GetInt32());
+                    break;
+
                 default:
                     Console.WriteLine($"[CEF] Unknown event: {eventName}");
                     break;
