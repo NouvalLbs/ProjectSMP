@@ -1,6 +1,7 @@
 ﻿#nullable enable
 using ProjectSMP.Entities;
 using ProjectSMP.Entities.Vehicles.Handbrake;
+using ProjectSMP.Extensions;
 using SampSharp.GameMode;
 using SampSharp.GameMode.Definitions;
 using SampSharp.GameMode.SAMP;
@@ -75,6 +76,15 @@ namespace ProjectSMP.Features.Jobs.Core
                 player.RemoveFromVehicle();
 
             ScheduleRespawn(vehicle, delayMs);
+        }
+
+        public static void StopAndEject(Player player)
+        {
+            if (player == null || !player.IsConnected) return;
+            var pos = player.Position;
+            player.RemoveFromVehicle();
+            var t = new Timer(100, false);
+            t.Tick += (s, e) => { t.Dispose(); if (!player.IsConnected) return; player.SetPositionSafe(pos); };
         }
 
         public static bool IsPendingRespawn(int vehicleId) => _pending.ContainsKey(vehicleId);

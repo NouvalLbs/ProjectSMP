@@ -129,6 +129,8 @@ namespace ProjectSMP.Entities.Players.Administrator
             ask.PlayerName = "";
             ask.Question = "";
             ask.TimeToExpire = 0;
+            ask.LockedBy = -1;
+            ask.LockedByName = "";
         }
 
         public static List<AskData> GetActiveAsks()
@@ -139,6 +141,33 @@ namespace ProjectSMP.Entities.Players.Administrator
         public static int GetAskCount()
         {
             return _asks.Count(a => a.InUse);
+        }
+
+        public static bool TryLockAsk(int askId, Player admin)
+        {
+            var ask = _asks.FirstOrDefault(a => a.InUse && a.Id == askId);
+            if (ask == null) return false;
+            if (ask.LockedBy != -1 && ask.LockedBy != admin.Id) return false;
+            ask.LockedBy = admin.Id;
+            ask.LockedByName = admin.Ucp;
+            return true;
+        }
+
+        public static void UnlockAsk(int askId, Player admin)
+        {
+            var ask = _asks.FirstOrDefault(a => a.InUse && a.Id == askId && a.LockedBy == admin.Id);
+            if (ask == null) return;
+            ask.LockedBy = -1;
+            ask.LockedByName = "";
+        }
+
+        public static void UnlockAllByAdmin(Player admin)
+        {
+            foreach (var ask in _asks.Where(a => a.InUse && a.LockedBy == admin.Id))
+            {
+                ask.LockedBy = -1;
+                ask.LockedByName = "";
+            }
         }
     }
 }

@@ -44,6 +44,7 @@
         public const string Sweeper = "{C6E2FF}[SWEEPER]:{FFFFFF}";
         public const string Bus = "{C6E2FF}[BUS]:{FFFFFF}";
         public const string Trashmaster = "{556B4F}[Trashmaster]{FFFFFF}";
+        public const string Mower = "{C6E2FF}[MOWER]:{FFFFFF}";
         public const string Vehicles = "{C6E2FF}VEHICLE:{FFFFFF}";
     }
 }

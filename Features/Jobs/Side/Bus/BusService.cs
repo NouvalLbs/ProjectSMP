@@ -394,7 +394,7 @@ namespace ProjectSMP.Features.Jobs.Side.Bus
         {
             _activeRoutes.Remove(session.Route);
             _sessions.Remove(player.Id);
-            player.RemoveFromVehicle();
+            SideJobVehicleManager.StopAndEject(player);
 
             var salary = Salaries[(int)session.Route];
             DelayService.SetJobDelay(player, "bus", DelayMinutes);

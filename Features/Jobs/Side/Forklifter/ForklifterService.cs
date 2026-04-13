@@ -264,7 +264,6 @@ namespace ProjectSMP.Features.Jobs.Side.Forklifter
                 case ForklifterPhase.ReturnToParking:
                     ClearCheckpoint(player.Id);
                     var finishVehicle = BaseVehicle.Find(session.VehicleId) as Vehicle;
-                    player.RemoveFromVehicle();
                     FinalizeJob(player, finishVehicle);
                     break;
             }
@@ -274,6 +273,7 @@ namespace ProjectSMP.Features.Jobs.Side.Forklifter
         {
             _sessions.Remove(player.Id);
             ClearCheckpoint(player.Id);
+            SideJobVehicleManager.StopAndEject(player);
 
             if (player.ProgressBarData.IsActive)
                 ProgressBarService.DestroyProgressBar(player);

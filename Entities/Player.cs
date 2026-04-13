@@ -22,6 +22,7 @@ using ProjectSMP.Features.EnterExit;
 using ProjectSMP.Features.Jobs.Core.DynamicJob;
 using ProjectSMP.Features.Jobs.Side.Bus;
 using ProjectSMP.Features.Jobs.Side.Forklifter;
+using ProjectSMP.Features.Jobs.Side.Mower;
 using ProjectSMP.Features.Jobs.Side.Sweeper;
 using ProjectSMP.Features.Jobs.Side.Trashmaster;
 using ProjectSMP.Features.PreviewModelDialog;
@@ -75,6 +76,7 @@ namespace ProjectSMP
             NameTagService.Cleanup(this);
             ChatService.Cleanup(this);
             AskService.ClearPlayerAsks(this);
+            AskService.UnlockAllByAdmin(this);
             AdminVehicleService.Cleanup(this);
             _ = InventoryService.SaveAsync(this);
             ProgressBarService.OnPlayerDisconnect(this);
@@ -84,6 +86,7 @@ namespace ProjectSMP
             SweeperService.OnPlayerDisconnect(this);
             BusService.OnPlayerDisconnect(this);
             TrashmasterService.OnPlayerDisconnect(this);
+            MowerService.OnPlayerDisconnect(this);
             this.ClearPlayerData();
             base.OnDisconnected(e);
         }
@@ -227,6 +230,7 @@ namespace ProjectSMP
             SweeperService.OnPlayerEnterVehicle(this, e.Vehicle as Vehicle, e.IsPassenger);
             BusService.OnPlayerEnterVehicle(this, e.Vehicle as Vehicle, e.IsPassenger);
             TrashmasterService.OnPlayerEnterVehicle(this, e.Vehicle as Vehicle, e.IsPassenger);
+            MowerService.OnPlayerEnterVehicle(this, e.Vehicle as Vehicle, e.IsPassenger);
         }
 
         public override void OnExitVehicle(PlayerVehicleEventArgs e)
@@ -237,6 +241,7 @@ namespace ProjectSMP
             SweeperService.OnPlayerExitVehicle(this, e.Vehicle as Vehicle);
             BusService.OnPlayerExitVehicle(this, e.Vehicle as Vehicle);
             TrashmasterService.OnPlayerExitVehicle(this, e.Vehicle as Vehicle);
+            MowerService.OnPlayerExitVehicle(this, e.Vehicle as Vehicle);
         }
 
         public override void OnKeyStateChanged(KeyStateChangedEventArgs e)
@@ -247,8 +252,10 @@ namespace ProjectSMP
                     EngineService.ToggleEngine(this);
             }
 
-            if (e.NewKeys.HasFlag(Keys.Crouch) && !e.OldKeys.HasFlag(Keys.Crouch))
+            if (e.NewKeys.HasFlag(Keys.Crouch) && !e.OldKeys.HasFlag(Keys.Crouch)) {
                 EVFExtensions.HandleHorn(this);
+                TrashmasterService.HandleDropoutInteract(this);
+            }
 
             if (e.NewKeys.HasFlag(Keys.SecondaryAttack))
             {
@@ -265,7 +272,6 @@ namespace ProjectSMP
                 BankPickupService.HandleInteract(this);
                 ATMService.HandleInteract(this);
                 JobPickupService.HandleInteract(this);
-                TrashmasterService.HandleDropoutInteract(this);
             }
 
             if (e.NewKeys.HasFlag(Keys.Walk))
@@ -293,6 +299,7 @@ namespace ProjectSMP
             SweeperService.OnPlayerStateChanged(this, e.NewState, e.OldState);
             BusService.OnPlayerStateChanged(this, e.NewState, e.OldState);
             TrashmasterService.OnPlayerStateChanged(this, e.NewState, e.OldState);
+            MowerService.OnPlayerStateChanged(this, e.NewState, e.OldState);
         }
 
         public override void OnClickMap(PositionEventArgs e)

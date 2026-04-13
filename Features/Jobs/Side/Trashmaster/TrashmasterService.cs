@@ -151,7 +151,17 @@ namespace ProjectSMP.Features.Jobs.Side.Trashmaster
             if (session.Phase != TrashmasterPhase.GoToDropout) return;
             if (player.Position.DistanceTo(DropoutPos) > DropoutInteractRadius) return;
 
-            FinalizeJob(player, session);
+            session.Phase = TrashmasterPhase.Dumping;
+            player.ToggleControllable(false);
+            ProgressBarService.StartProgress(player, 10, "Dumping_Trash...");
+
+            var t = new Timer(10 * 1000, false);
+            t.Tick += (s, e) => {
+                t.Dispose();
+                if (!player.IsConnected || !_sessions.TryGetValue(player.Id, out var sess)) return;
+                player.ToggleControllable(true);
+                FinalizeJob(player, sess);
+            };
         }
 
         private static void ShowStartDialog(Player player)
@@ -183,20 +193,20 @@ namespace ProjectSMP.Features.Jobs.Side.Trashmaster
         private static void ShowBriefing(Player player)
         {
             const string text =
-            "{FFFFFF}Kamu ditugaskan untuk membantu proses pengangkutan sampah di wilayah kota Los Santos.\n " +
+            "{FFFFFF}Kamu ditugaskan untuk membantu proses pengangkutan sampah di wilayah kota Los Santos.\n" +
             "Mulailah dengan menuju kendaraan Trashmaster, lalu masuk ke dalamnya untuk memulai pekerjaan.\n\n" +
 
-            "Setelah siap, sistem akan mengarahkan kamu ke beberapa titik lokasi sampah melalui waypoint yang telah ditentukan.\n " +
-            "Bawa kendaraan mendekati area tersebut untuk melakukan proses pengambilan sampah.\n " +
+            "Setelah siap, sistem akan mengarahkan kamu ke beberapa titik lokasi sampah melalui waypoint yang telah ditentukan.\n" +
+            "Bawa kendaraan mendekati area tersebut untuk melakukan proses pengambilan sampah.\n" +
             "Tekan tombol {FFFF00}Y{FFFFFF} saat berada di lokasi agar sampah dapat dimuat ke kendaraan.\n\n" +
 
-            "Setelah sampah berhasil dikumpulkan, lanjutkan dengan menuju bagian belakang kendaraan Trashmaster\n " +
+            "Setelah sampah berhasil dikumpulkan, lanjutkan dengan menuju bagian belakang kendaraan Trashmaster\n" +
             "untuk membuang muatan yang telah diambil.\n\n" +
 
             "{FFFF00}Catatan:{FFFFFF}\n" +
-            "Perhatikan indikator Trash Garbage Bin yang menunjukkan jumlah sampah yang sudah berhasil dikumpulkan.\n " +
-            "Jika masih belum penuh, lanjutkan perjalanan ke titik sampah berikutnya yang tersedia.\n " +
-            "Apabila indikator menunjukkan jumlah maksimum, berarti seluruh tugas pengangkutan telah selesai\n " +
+            "Perhatikan indikator Trash Garbage Bin yang menunjukkan jumlah sampah yang sudah berhasil dikumpulkan.\n" +
+            "Jika masih belum penuh, lanjutkan perjalanan ke titik sampah berikutnya yang tersedia.\n" +
+            "Apabila indikator menunjukkan jumlah maksimum, berarti seluruh tugas pengangkutan telah selesai\n" +
             "dan pekerjaan dapat diakhiri.";
 
             player.ShowMessage("Los Santos Waste Management", text)
@@ -327,7 +337,7 @@ namespace ProjectSMP.Features.Jobs.Side.Trashmaster
             _sessions.Remove(player.Id);
             ClearCheckpoint(player.Id);
             CleanupAttachment(player);
-            player.RemoveFromVehicle();
+            SideJobVehicleManager.StopAndEject(player);
 
             DelayService.SetJobDelay(player, "trashmaster", DelayMinutes);
             PaycheckService.GivePaycheck(player, PaycheckAmount, "Sidejob(Trashmaster)");

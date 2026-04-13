@@ -4,6 +4,7 @@ using SampSharp.GameMode.Definitions;
 using SampSharp.GameMode.SAMP;
 using SampSharp.GameMode.SAMP.Commands;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace ProjectSMP.Entities.Players.Administrator.Commands
 {
@@ -62,7 +63,8 @@ namespace ProjectSMP.Entities.Players.Administrator.Commands
             foreach (var ask in asks)
             {
                 var timeStr = ask.CreatedAt.ToString("HH:mm:ss");
-                var askerStr = $"{{ffffff}}P{ask.PlayerId}: {{FFFF00}}{ask.PlayerName}";
+                var lockStr = ask.LockedBy != -1 ? $" {{ff6347}}[{ask.LockedByName}]" : "";
+                var askerStr = $"{{ffffff}}P{ask.PlayerId}: {{FFFF00}}{ask.PlayerName}{lockStr}";
 
                 var question = ask.Question.Length > 50
                     ? ask.Question.Substring(0, 50) + "..."
@@ -70,10 +72,10 @@ namespace ProjectSMP.Entities.Players.Administrator.Commands
 
                 rows.Add(new[]
                 {
-                    askerStr,
-                    $"{{ffffff}}{timeStr}",
-                    $"{{ffffff}}{question}"
-                });
+            askerStr,
+            $"{{ffffff}}{timeStr}",
+            $"{{ffffff}}{question}"
+        });
 
                 askMapping[listIndex] = ask.Id;
                 listIndex++;
@@ -102,6 +104,14 @@ namespace ProjectSMP.Entities.Players.Administrator.Commands
                         return;
                     }
 
+                    if (!AskService.TryLockAsk(selectedAsk.Id, player))
+                    {
+                        player.SendClientMessage(Color.White, $"{Msg.Error} Ask ini sedang ditangani oleh {selectedAsk.LockedByName}.");
+                        Asks(player);
+                        return;
+                    }
+
+                    player.SetData("SelectedAskId", selectedAsk.Id);
                     player.SetData("SelectedAskPlayerId", selectedAsk.PlayerId);
 
                     var body = $"{{FFFFFF}}Player: {{FFFF00}}{selectedAsk.PlayerName}\n" +
@@ -114,6 +124,9 @@ namespace ProjectSMP.Entities.Players.Administrator.Commands
                         {
                             if (answerEvent.DialogButton != DialogButton.Left)
                             {
+                                AskService.UnlockAsk(player.GetData("SelectedAskId", -1), player);
+                                player.SetData("SelectedAskId", -1);
+                                player.SetData("SelectedAskPlayerId", -1);
                                 Asks(player);
                                 return;
                             }
@@ -121,11 +134,13 @@ namespace ProjectSMP.Entities.Players.Administrator.Commands
                             var targetId = player.GetData("SelectedAskPlayerId", -1);
                             if (targetId == -1 || string.IsNullOrWhiteSpace(answerEvent.InputText))
                             {
+                                AskService.UnlockAsk(player.GetData("SelectedAskId", -1), player);
                                 player.SendClientMessage(Color.White, $"{Msg.Error} Jawaban tidak valid.");
                                 return;
                             }
 
                             AskService.AnswerAsk(player, targetId, answerEvent.InputText);
+                            player.SetData("SelectedAskId", -1);
                             player.SetData("SelectedAskPlayerId", -1);
                         });
                 });
@@ -149,6 +164,13 @@ namespace ProjectSMP.Entities.Players.Administrator.Commands
             if (askCount == 0)
             {
                 player.SendClientMessage(Color.White, $"{Msg.Error} Player ini tidak bertanya apa-apa.");
+                return;
+            }
+
+            var targetAsk = AskService.GetActiveAsks().FirstOrDefault(a => a.PlayerId == target.Id);
+            if (targetAsk != null && targetAsk.LockedBy != -1 && targetAsk.LockedBy != player.Id)
+            {
+                player.SendClientMessage(Color.White, $"{Msg.Error} Ask player ini sedang ditangani oleh {targetAsk.LockedByName}.");
                 return;
             }
 

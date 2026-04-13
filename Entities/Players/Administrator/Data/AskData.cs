@@ -11,5 +11,7 @@ namespace ProjectSMP.Entities.Players.Administrator.Data
         public string Question { get; set; } = "";
         public DateTime CreatedAt { get; set; }
         public int TimeToExpire { get; set; }
+        public int LockedBy { get; set; } = -1;
+        public string LockedByName { get; set; } = "";
     }
 }
