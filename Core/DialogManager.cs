@@ -266,7 +266,7 @@ namespace ProjectSMP.Core
 
         public class PagedListDialogBuilder
         {
-            private const int ItemsPerPage = 10;
+            private const int ItemsPerPage = 15;
             private readonly BasePlayer _player;
             private readonly string _title;
             private readonly string[] _items;
@@ -346,7 +346,7 @@ namespace ProjectSMP.Core
 
         public class PagedTabListDialogBuilder
         {
-            private const int ItemsPerPage = 10;
+            private const int ItemsPerPage = 15;
             private readonly BasePlayer _player;
             private readonly string _title;
             private readonly string[] _headers;
